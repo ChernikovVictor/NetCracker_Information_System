@@ -9,6 +9,7 @@ public class TransportController
 
     public static void main(String[] args)
     {
+        System.out.println("test new Branch \"Victor\"");
         transport = new Train();
         view = new ConsoleView();
         String buffer = "1";
