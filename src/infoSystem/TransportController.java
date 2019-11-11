@@ -17,14 +17,16 @@ public class TransportController
         Scanner scanner = new Scanner(System.in);
         while (!buffer.equals("0"))
         {
-            System.out.println("Справочная система\n" +
+            System.out.println("\tСправочная система\n" +
                     "1. Показать информацию о поезде\n" +
-                    "2. Добавить поезд\n" +
-                    "3. Удалить поезд\n" +
-                    "4. Изменить информацию о поезде\n" +
+                    "2. Изменить информацию о поезде\n" +
+                    "3. Добавить поезд\n" +
+                    "4. Удалить поезд\n" +
                     "5. Показать все поезда\n" +
                     "0. Выход");
+            System.out.print("Выберите действие: ");
             buffer = scanner.nextLine();
+            System.out.println("---------------------------------------");
             switch (buffer)
             {
                 case "1":
@@ -33,20 +35,25 @@ public class TransportController
                     scanner.nextLine();
                     break;
                 case "2":
-                    model.addTransport(createTransport());
+                    System.out.println("Введите номер поезда");
+                    Transport transport = model.getTransport(scanner.nextInt());
+                    scanner.nextLine();
+                    if (transport == null)
+                        System.out.println("Поезда с таким номером не существует");
+                    else
+                        changeTransportInfo(transport);
                     break;
                 case "3":
+                    model.addTransport(createTransport());
+                    System.out.println("Поезд добавлен в систему");
+                    break;
+                case "4":
                     System.out.println("Введите номер поезда");
                     model.removeTransport(scanner.nextInt());
                     scanner.nextLine();
                     break;
-                case "4":
-                    System.out.println("Введите номер поезда");
-                    Transport transport = model.getTransport(scanner.nextInt());
-                    scanner.nextLine();
-                    changeTransportInfo(transport);
-                    break;
                 case "5":
+                    System.out.println("Доступные поезда:");
                     view.showAllTransports(model);
                     break;
                 case "0":
@@ -55,6 +62,7 @@ public class TransportController
                     System.out.println("Некорректные данные");
                     break;
             }
+            System.out.println("---------------------------------------");
         }
 
         // сохраняем информацию
@@ -69,7 +77,7 @@ public class TransportController
         int index = scanner.nextInt();
         scanner.nextLine();
 
-        System.out.println("Введите маршрут");
+        System.out.println("Введите маршрут (Например: Самара - Москва)");
         String s = scanner.nextLine();
         int pos = s.indexOf('-');
         Route route = Route.builder().departure(s.substring(0, pos - 1)).destination(s.substring(pos + 2)).build();
@@ -89,31 +97,36 @@ public class TransportController
         String buffer = "1";
         Scanner scanner = new Scanner(System.in);
         while (!buffer.equals("0")) {
+            System.out.println(".....................................");
             view.showTransport(transport);
-            System.out.println("Выберите действие:\n" +
+            System.out.println("\tВыберите действие:\n" +
                     "1. Изменить номер поезда\n" +
                     "2. Изменить маршрут\n" +
                     "3. Изменить время отправления\n" +
                     "4. Изменить путевое время\n" +
                     "0. Выход");
             buffer = scanner.nextLine();
+            System.out.println(".....................................");
             switch (buffer) {
                 case "1":
+                    System.out.println("Введите новый номер поезда");
                     transport.setIndex(scanner.nextInt());
                     scanner.nextLine();
                     break;
                 case "2":
                     Route route = Route.builder().build();
-                    System.out.println("Введите начальную станцию");
+                    System.out.println("Введите новую начальную станцию");
                     route.setDeparture(scanner.nextLine());
-                    System.out.println("Введите конечную станцию");
+                    System.out.println("Введите новую конечную станцию");
                     route.setDestination(scanner.nextLine());
                     transport.setRoute(route);
                     break;
                 case "3":
+                    System.out.println("Введите новое время отправления");
                     transport.setDepartureTime(scanner.nextLine());
                     break;
                 case "4":
+                    System.out.println("Введите новое время в пути");
                     transport.setTravelTime(scanner.nextLine());
                     break;
                 case "0":

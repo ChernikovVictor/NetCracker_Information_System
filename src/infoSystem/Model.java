@@ -1,6 +1,6 @@
 package infoSystem;
 
-public interface Model
+public interface Model extends Iterable<Transport>
 {
     void addTransport(Transport transport);
     void removeTransport(int index);
