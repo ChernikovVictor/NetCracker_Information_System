@@ -7,11 +7,11 @@ public class TransportController
 {
     private static Model model;
     private static View view;
-    private static final String filename = "FILE.bin";
+    private static final String FILENAME = "FILE.bin";
 
     public static void main(String[] args)
     {
-        model = deserializeModel(filename); // получаем данные из файла
+        model = deserializeModel(FILENAME); // получаем данные из файла
         view = new ConsoleView();
         String buffer = "1";
         Scanner scanner = new Scanner(System.in);
@@ -27,8 +27,7 @@ public class TransportController
             System.out.print("Выберите действие: ");
             buffer = scanner.nextLine();
             System.out.println("---------------------------------------");
-            switch (buffer)
-            {
+            switch (buffer) {
                 case "1":
                     System.out.println("Введите номер поезда");
                     view.showTransport(scanner.nextInt(), model);
@@ -66,7 +65,7 @@ public class TransportController
         }
 
         // сохраняем информацию
-        serializeModel(model, filename);
+        serializeModel(model, FILENAME);
     }
 
     // создать транспорт через консоль
@@ -156,7 +155,7 @@ public class TransportController
     {
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(filename)))
         {
-            return (Model)in.readObject();
+            return (Model) in.readObject();
         }
         catch (IOException | ClassNotFoundException e)
         {
