@@ -1,6 +1,7 @@
 package infoSystem;
 
 import java.util.Iterator;
+import java.util.List;
 
 public class ConsoleView implements View
 {
@@ -26,7 +27,8 @@ public class ConsoleView implements View
     @Override
     public void showAllTransports(Model model)
     {
-        for (Transport transport : model)
+        List<Transport> transports = model.getTransports();
+        for (Transport transport : transports)
             showTransport(transport);
     }
 }

@@ -1,10 +1,12 @@
 package infoSystem;
 
-public interface Model extends Iterable<Transport>
+import java.util.List;
+
+public interface Model
 {
     void addTransport(Transport transport);
     void removeTransport(int index);
     Transport getTransport(int index);
     void setTransport(int index, Transport transport);
-    int count(); // кол-во траспортов в списке модели
+    List<Transport> getTransports();
 }

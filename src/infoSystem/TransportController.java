@@ -1,6 +1,7 @@
 package infoSystem;
 
 import java.io.*;
+import java.util.List;
 import java.util.Scanner;
 
 public class TransportController
@@ -11,51 +12,61 @@ public class TransportController
 
     public static void main(String[] args)
     {
-        model = deserializeModel(FILENAME); // получаем данные из файла
+        model = new TransportModel(deserializeTransports(FILENAME)); // получаем данные из файла
         view = new ConsoleView();
         String buffer = "1";
         Scanner scanner = new Scanner(System.in);
-        while (!buffer.equals("0"))
+        while (!buffer.equals("exit"))
         {
-            System.out.println("\tСправочная система\n" +
-                    "1. Показать информацию о поезде\n" +
-                    "2. Изменить информацию о поезде\n" +
-                    "3. Добавить поезд\n" +
-                    "4. Удалить поезд\n" +
-                    "5. Показать все поезда\n" +
-                    "0. Выход");
-            System.out.print("Выберите действие: ");
+            System.out.println("\tСправочная система (подсказки: help)");
+            System.out.println("Введите команду:");
             buffer = scanner.nextLine();
             System.out.println("---------------------------------------");
-            switch (buffer) {
-                case "1":
-                    System.out.println("Введите номер поезда");
-                    view.showTransport(scanner.nextInt(), model);
-                    scanner.nextLine();
+            int posSpace = buffer.indexOf(' ');
+            if (posSpace == -1)
+                posSpace = buffer.length();
+            switch (buffer.substring(0, posSpace)) {
+                case "get":
+                    try {
+                        int index = Integer.parseInt(buffer.substring(posSpace + 1));
+                        view.showTransport(index, model);
+                    } catch (NumberFormatException | IndexOutOfBoundsException e) {
+                        System.out.println("Некорректный индекс");
+                    }
                     break;
-                case "2":
-                    System.out.println("Введите номер поезда");
-                    Transport transport = model.getTransport(scanner.nextInt());
-                    scanner.nextLine();
-                    if (transport == null)
-                        System.out.println("Поезда с таким номером не существует");
-                    else
-                        changeTransportInfo(transport);
+                case "set":
+                    try {
+                        int index = Integer.parseInt(buffer.substring(posSpace + 1));
+                        Transport transport = model.getTransport(index);
+                        if (transport == null)
+                            System.out.println("Поезда с таким номером не существует");
+                        else
+                            changeTransportInfo(transport);
+                    } catch (NumberFormatException | IndexOutOfBoundsException e) {
+                        System.out.println("Некорректный индекс");
+                    }
                     break;
-                case "3":
+                case "add":
                     model.addTransport(createTransport());
                     System.out.println("Поезд добавлен в систему");
                     break;
-                case "4":
-                    System.out.println("Введите номер поезда");
-                    model.removeTransport(scanner.nextInt());
-                    scanner.nextLine();
+                case "rm":
+                    try {
+                        int index = Integer.parseInt(buffer.substring(posSpace + 1));
+                        model.removeTransport(index);
+                        System.out.println("Поезд с номером " + index + " удален из системы");
+                    } catch (NumberFormatException | IndexOutOfBoundsException e) {
+                        System.out.println("Некорректный индекс");
+                    }
                     break;
-                case "5":
+                case "show":
                     System.out.println("Доступные поезда:");
                     view.showAllTransports(model);
                     break;
-                case "0":
+                case "exit":
+                    break;
+                case "help":
+                    helpInfoSystem();
                     break;
                 default:
                     System.out.println("Некорректные данные");
@@ -65,7 +76,7 @@ public class TransportController
         }
 
         // сохраняем информацию
-        serializeModel(model, FILENAME);
+        serializeTransports(model.getTransports(), FILENAME);
     }
 
     // создать транспорт через консоль
@@ -95,40 +106,53 @@ public class TransportController
     {
         String buffer = "1";
         Scanner scanner = new Scanner(System.in);
-        while (!buffer.equals("0")) {
+        while (!buffer.equals("exit")) {
             System.out.println(".....................................");
             view.showTransport(transport);
-            System.out.println("\tВыберите действие:\n" +
-                    "1. Изменить номер поезда\n" +
-                    "2. Изменить маршрут\n" +
-                    "3. Изменить время отправления\n" +
-                    "4. Изменить путевое время\n" +
-                    "0. Выход");
+            System.out.println("\tВыберите действие (подсказки: help)");
             buffer = scanner.nextLine();
+            int posSpace = buffer.indexOf(' ');
+            if (posSpace == -1)
+                posSpace = buffer.length();
             System.out.println(".....................................");
-            switch (buffer) {
-                case "1":
-                    System.out.println("Введите новый номер поезда");
-                    transport.setIndex(scanner.nextInt());
-                    scanner.nextLine();
+            switch (buffer.substring(0, posSpace)) {
+                case "index":
+                    try {
+                        int index = Integer.parseInt(buffer.substring(posSpace + 1));
+                        transport.setIndex(index);
+                    } catch (NumberFormatException | IndexOutOfBoundsException e) {
+                        System.out.println("Некорректный индекс");
+                    }
                     break;
-                case "2":
-                    Route route = Route.builder().build();
-                    System.out.println("Введите новую начальную станцию");
-                    route.setDeparture(scanner.nextLine());
-                    System.out.println("Введите новую конечную станцию");
-                    route.setDestination(scanner.nextLine());
-                    transport.setRoute(route);
+                case "route":
+                    try {
+                        String s = buffer.substring(posSpace + 1);
+                        int pos = s.indexOf('-');
+                        Route route = Route.builder().departure(s.substring(0, pos - 1))
+                                .destination(s.substring(pos + 2)).build();
+                        transport.setRoute(route);
+                    } catch (NumberFormatException | IndexOutOfBoundsException e) {
+                        System.out.println("Некорректный маршрут");
+                    }
                     break;
-                case "3":
-                    System.out.println("Введите новое время отправления");
-                    transport.setDepartureTime(scanner.nextLine());
+                case "dTime":
+                    try {
+                        transport.setDepartureTime(buffer.substring(posSpace + 1));
+                    } catch (IndexOutOfBoundsException e) {
+                        System.out.println("Некорректные данные");
+                    }
                     break;
-                case "4":
-                    System.out.println("Введите новое время в пути");
-                    transport.setTravelTime(scanner.nextLine());
+                case "tTime":
+                    try {
+                        transport.setTravelTime(buffer.substring(posSpace + 1));
+                    } catch (IndexOutOfBoundsException e) {
+                        System.out.println("Некорректные данные");
+                    }
                     break;
-                case "0":
+                case "exit":
+                    break;
+                case "help":
+                    helpCreateTransport();
                     break;
                 default:
                     System.out.println("Некорректные данные");
@@ -138,29 +162,39 @@ public class TransportController
     }
 
     // сериализовать модель в файл
-    private static void serializeModel(Model model, String filename)
-    {
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filename)))
-        {
-            out.writeObject(model);
-        }
-        catch (IOException e)
-        {
+    private static void serializeTransports(List<Transport> transports, String filename) {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filename))) {
+            out.writeObject(transports);
+        } catch (IOException e) {
             System.out.println(e.getMessage());
         }
     }
 
     // десериализовать модель из файла
-    private static Model deserializeModel(String filename)
+    private static List<Transport> deserializeTransports(String filename)
     {
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(filename)))
-        {
-            return (Model) in.readObject();
-        }
-        catch (IOException | ClassNotFoundException e)
-        {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(filename))) {
+            return (List<Transport>) in.readObject();
+        } catch (IOException | ClassNotFoundException e) {
             System.out.println(e.getMessage());
             return null;
         }
+    }
+
+    private static void helpInfoSystem() {
+        System.out.println("Показать информацию о поезде: get \"index\"\n" +
+                "Изменить информацию о поезде: set \"index\"\n" +
+                "Добавить поезд: add\n" +
+                "Удалить поезд: rm \"index\"\n" +
+                "Показать все поезда: show\n" +
+                "Выход: exit");
+    }
+
+    private static void helpCreateTransport() {
+        System.out.println("Изменить номер поезда: index \"index\"\n" +
+                "Изменить маршрут: route \"start - finish\"\n" +
+                "Изменить время отправления: dTime \"time\"\n" +
+                "Изменить путевое время: tTime \"time\"\n" +
+                "Выход: exit");
     }
 }
