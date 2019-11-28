@@ -1,6 +1,8 @@
-package infoSystem;
+package infoSystem.model;
 
-public interface Transport
+import java.io.Serializable;
+
+public interface Transport extends Serializable
 {
     int getIndex();
     void setIndex(int value);

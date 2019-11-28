@@ -1,8 +1,9 @@
-package infoSystem;
+package infoSystem.model;
 
+import java.io.Serializable;
 import java.util.List;
 
-public interface Model
+public interface Model extends Serializable
 {
     void addTransport(Transport transport);
     void removeTransport(int index);

@@ -1,4 +1,7 @@
-package infoSystem;
+package infoSystem.view;
+
+import infoSystem.model.Model;
+import infoSystem.model.Transport;
 
 public interface View
 {

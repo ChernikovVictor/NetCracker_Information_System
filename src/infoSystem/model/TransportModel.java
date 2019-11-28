@@ -1,4 +1,4 @@
-package infoSystem;
+package infoSystem.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;

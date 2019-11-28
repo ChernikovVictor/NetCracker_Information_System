@@ -1,4 +1,4 @@
-package infoSystem;
+package infoSystem.model;
 
 import lombok.Builder;
 import lombok.Data;
