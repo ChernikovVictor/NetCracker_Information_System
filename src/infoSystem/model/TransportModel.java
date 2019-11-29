@@ -1,11 +1,12 @@
 package infoSystem.model;
 
+import javax.swing.event.TableModelListener;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class TransportModel implements Model, Serializable
 {
+    private Set<TableModelListener> listeners = new HashSet<TableModelListener>();
     private List<Transport> transports;
 
     public TransportModel()
@@ -54,5 +55,95 @@ public class TransportModel implements Model, Serializable
                 return;
             }
         }
+    }
+
+    /* Методы интерфейса TableModel */
+    @Override
+    public int getRowCount() {
+        return transports.size();
+    }
+
+    @Override
+    public int getColumnCount() {
+        return 4;
+    }
+
+    @Override
+    public String getColumnName(int columnIndex) {
+        switch (columnIndex) {
+            case 0:
+                return "Номер";
+            case 1:
+                return "Маршрут";
+            case 2:
+                return "Время отправления";
+            case 3:
+                return "Время в пути";
+            default:
+                return "";
+        }
+    }
+
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+        switch (columnIndex) {
+            case 0:
+                return Integer.class;
+            case 1:
+                return Route.class;
+            default:
+                return String.class;
+        }
+    }
+
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return true;
+    }
+
+    @Override
+    public Object getValueAt(int rowIndex, int columnIndex) {
+        Transport transport = transports.get(rowIndex);
+        switch (columnIndex) {
+            case 0:
+                return transport.getIndex();
+            case 1:
+                return transport.getRoute();
+            case 2:
+                return transport.getDepartureTime();
+            case 3:
+                return transport.getTravelTime();
+            default:
+                return "";
+        }
+    }
+
+    @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        Transport transport = transports.get(rowIndex);
+        switch (columnIndex) {
+            case 0:
+                transport.setIndex((int) aValue);
+                break;
+            case 1:
+                transport.setRoute((Route) aValue);
+                break;
+            case 2:
+                transport.setDepartureTime((String) aValue);
+                break;
+            case 3:
+                transport.setTravelTime((String) aValue);
+                break;
+        }
+    }
+
+    @Override
+    public void addTableModelListener(TableModelListener l) {
+        listeners.add(l);
+    }
+
+    @Override
+    public void removeTableModelListener(TableModelListener l) {
+        listeners.remove(l);
     }
 }

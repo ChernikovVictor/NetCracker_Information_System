@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import infoSystem.model.*;
+import infoSystem.view.ConsoleView;
 
 public class Server {
 
@@ -26,6 +27,8 @@ public class Server {
             /* Получаем данные из файла */
             model = new TransportModel(SaveData.deserializeTransports(FILENAME));
             controller = new TransportController(model);
+            System.out.println("Считали из файла список транспортов");
+            (new ConsoleView()).showAllTransports(model);
 
             clientSocket = server.accept();
 
@@ -39,6 +42,7 @@ public class Server {
                 do {
                     try {
                         command = (String) in.readObject();
+                        System.out.println("Получена команда " + command);
                     } catch (IOException | ClassNotFoundException e) {
                         System.out.println(e.getMessage());
                         out.writeObject("Error");
@@ -58,6 +62,8 @@ public class Server {
                                 if (transport == null) {
                                     out.writeObject("Поезда с таким номером не существует");
                                 } else {
+                                    System.out.println("Ответ клиенту:");
+                                    (new ConsoleView()).showTransport(transport);
                                     out.writeObject(transport);
                                 }
                             } catch (ClassCastException | IndexOutOfBoundsException e) {
@@ -71,7 +77,11 @@ public class Server {
                                 if (transport == null) {
                                     out.writeObject("Поезда с таким номером не существует");
                                 } else {
+                                    System.out.println("Поезд до изменения");
+                                    (new ConsoleView()).showTransport(transport);
                                     changeTransportInfo(transport);
+                                    System.out.println("Поезд после изменения");
+                                    (new ConsoleView()).showTransport(transport);
                                     out.writeObject("Поезд изменен");
                                 }
                             } catch (ClassCastException | IndexOutOfBoundsException e) {
@@ -104,6 +114,8 @@ public class Server {
                             break;
                         case "show":
                             out.writeObject(model);
+                            System.out.println("Модель, переданная клиенту:");
+                            (new ConsoleView()).showAllTransports(model);
                             break;
                         case "exit":
                             break;
@@ -137,11 +149,13 @@ public class Server {
 
     // изменить информацию о транспорте
     private static void changeTransportInfo(Transport transport) throws IOException, ClassNotFoundException {
-        String buffer = "1";
+        String buffer;
+        (new ConsoleView()).showTransport(transport);
         out.writeObject(transport);
         out.flush();
-        while (!buffer.equals("return")) {
+        do {
             buffer = (String) in.readObject();
+            System.out.println("Получена команда " + buffer);
             int posSpace = buffer.indexOf(' ');
             if (posSpace == -1)
                 posSpace = buffer.length();
@@ -196,7 +210,7 @@ public class Server {
                     break;
             }
             out.flush();
-        }
+        } while (!buffer.equals("return"));
     }
 
     // создать новый транспорт
@@ -222,7 +236,7 @@ public class Server {
 
             return Train.builder().index(index).route(route).departureTime(time1).travelTime(time2).build();
         } catch (IOException | ClassNotFoundException | ClassCastException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Поезд не добавлен\n" + e.getMessage());
             return null;
         }
     }
