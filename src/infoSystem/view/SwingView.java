@@ -50,7 +50,7 @@ public class SwingView extends JFrame {
                 try {
                     out.writeObject("show");
                     out.flush();
-                    model = (Model) in.readObject();
+                    model = new TransportModel((java.util.List<Transport>) in.readObject());
                     table.setModel(model);
                     System.out.println("Список транспортов, полученный с сервера");
                     (new ConsoleView()).showAllTransports(model);

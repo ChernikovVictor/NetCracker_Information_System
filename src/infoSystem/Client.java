@@ -2,6 +2,7 @@ package infoSystem;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.List;
 import java.util.Scanner;
 import infoSystem.model.*;
 import infoSystem.view.*;
@@ -38,8 +39,8 @@ public class Client {
                         System.out.println(answer);
                     } else if (answer instanceof Transport) {
                         view.showTransport((Transport) answer);
-                    } else if (answer instanceof Model) {
-                        view.showAllTransports((Model) answer);
+                    } else if (answer instanceof List<?>) {
+                        view.showAllTransports(new TransportModel((List<Transport>) answer));
                     }
                 }
 

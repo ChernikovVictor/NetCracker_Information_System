@@ -15,11 +15,11 @@ public class Server {
     private static ObjectOutputStream out;
     private static final int PORT = 4004;
 
-    private static Model model;
-    private static TransportController controller;
     private static final String FILENAME = "FILE.bin";
 
     public static void main(String[] args) {
+        Model model = null;
+        TransportController controller;
         try {
             server = new ServerSocket(PORT);
             System.out.println("Сервер запущен");
@@ -113,8 +113,8 @@ public class Server {
                             }
                             break;
                         case "show":
-                            out.writeObject(model);
-                            System.out.println("Модель, переданная клиенту:");
+                            out.writeObject(model.getTransports());
+                            System.out.println("Список, переданный клиенту:");
                             (new ConsoleView()).showAllTransports(model);
                             break;
                         case "exit":
@@ -126,8 +126,11 @@ public class Server {
                             out.writeObject("Некорректные данные");
                             break;
                     }
+                    if (command.equals("exit"))
+                        break;
                     out.flush();
-                } while (!command.equals("exit"));
+                    out.reset();    // удалить хеши объектов, переданных в поток ранее
+                } while (true);
             } finally {
                 System.out.println("Клиент отсоединился");
                 in.close();
@@ -153,6 +156,7 @@ public class Server {
         (new ConsoleView()).showTransport(transport);
         out.writeObject(transport);
         out.flush();
+        out.reset();    // удалить хеши объектов, переданных в поток ранее
         do {
             buffer = (String) in.readObject();
             System.out.println("Получена команда " + buffer);
@@ -210,6 +214,7 @@ public class Server {
                     break;
             }
             out.flush();
+            out.reset();    // удалить хеши объектов, переданных в поток ранее
         } while (!buffer.equals("return"));
     }
 
