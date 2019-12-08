@@ -2,6 +2,9 @@ package infoSystem;
 
 import infoSystem.model.*;
 
+import java.util.Collections;
+import java.util.List;
+
 public class TransportController
 {
     private Model model;
@@ -12,19 +15,23 @@ public class TransportController
         this.model = model;
     }
 
-    public Transport getTransport(int index) {
+    public synchronized Transport getTransport(int index) {
         return model.getTransport(index);
     }
 
-    public void setTransport(int index, Transport transport) {
+    public synchronized void setTransport(int index, Transport transport) {
         model.setTransport(index, transport);
     }
 
-    public void addTransport(Transport transport) {
+    public synchronized void addTransport(Transport transport) {
         model.addTransport(transport);
     }
 
-    public void removeTransport(int index) {
+    public synchronized void removeTransport(int index) {
         model.removeTransport(index);
+    }
+
+    public synchronized void sortByDepartureTime() {
+        model.getTransports().sort(Transport.departureTimeComparator);
     }
 }

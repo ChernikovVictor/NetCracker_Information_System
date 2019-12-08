@@ -86,14 +86,7 @@ public class TransportModel implements Model, Serializable
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
-        switch (columnIndex) {
-            case 0:
-                return Integer.class;
-            case 1:
-                return Route.class;
-            default:
-                return String.class;
-        }
+        return (columnIndex == 0) ? Integer.class : String.class;
     }
 
     @Override
@@ -126,7 +119,12 @@ public class TransportModel implements Model, Serializable
                 transport.setIndex((int) aValue);
                 break;
             case 1:
-                transport.setRoute((Route) aValue);
+                String s = (String) aValue;
+                int pos = s.indexOf('-');
+                if (pos == -1)  // Если данные некорректные, то не изменять ничего
+                    return;
+                Route route = Route.builder().departure(s.substring(0, pos - 1)).destination(s.substring(pos + 2)).build();
+                transport.setRoute(route);
                 break;
             case 2:
                 transport.setDepartureTime((String) aValue);

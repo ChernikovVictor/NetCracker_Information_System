@@ -25,8 +25,18 @@ public class Client {
             in = new ObjectInputStream(clientSocket.getInputStream());
             Scanner scanner = new Scanner(System.in);
 
+            /* Возможность выключить сервер */
+            System.out.println("Отключить сервер: \"disable\"\n" +
+                    "Продолжить работу: \"something_else\"");
+            String command = scanner.nextLine();
+            out.writeObject(command);
+            out.flush();
+            if (command.equals("disable"))
+            {
+                return;
+            }
+
             System.out.println("Введите сообщение серверу");
-            String command;
             do {
                 command = scanner.nextLine();
                 System.out.println("---------------------------------------");
