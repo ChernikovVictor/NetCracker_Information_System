@@ -10,6 +10,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 
 public class SwingView extends JFrame {
@@ -21,6 +22,9 @@ public class SwingView extends JFrame {
 
     private Model model = new TransportModel();
     private JTable table;
+
+    /* Очередь команд, ожидающих отправки на сервер */
+    private ArrayDeque<String> commandQueue = new ArrayDeque<>();
 
     /* Список номеров поездов, полученных с сервера (нужен для корректного редактирования номера поезда) */
     private ArrayList<Integer> oldIndexes;
@@ -81,6 +85,11 @@ public class SwingView extends JFrame {
         sortButton.addActionListener(updateOrSortButtonPressed("sort"));
         southPanel.add(sortButton);
 
+        /* Кнопка "Сохранить изменения" */
+        JButton saveButton = createButton("Сохранить изменения");
+        saveButton.addActionListener(action -> pushCommandsToServer());
+        southPanel.add(saveButton);
+
         /* Добавляем панели во фрейм */
         getContentPane().add(southPanel);
         getContentPane().add(scrollPane);
@@ -121,23 +130,13 @@ public class SwingView extends JFrame {
         return new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    if (table.getSelectedRow() == -1)
-                        return;
-
-                    /* Номер удаляемого поезда */
-                    int index = (int) table.getValueAt(table.getSelectedRow(), 0);
-
-                    out.writeObject("rm " + index);
-                    out.flush();
-                    model.removeTransport(index);
-                    oldIndexes.remove(index);
-                    table.updateUI();
-
-                    System.out.println((String) in.readObject());
-                } catch (ClassNotFoundException | IOException ex) {
-                    System.out.println("Ошибка\n" + ex.getMessage());
-                }
+                if (table.getSelectedRow() == -1)
+                    return;
+                int index = (int) table.getValueAt(table.getSelectedRow(), 0);
+                commandQueue.addLast("rm " + index);
+                model.removeTransport(index);
+                oldIndexes.remove((Object) index);
+                table.updateUI();
             }
         };
     }
@@ -147,17 +146,11 @@ public class SwingView extends JFrame {
         return new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    out.writeObject("addNull");
-                    out.flush();
-                    Route route = Route.builder().departure("").destination("").build();
-                    model.addTransport(Train.builder().index(-1).route(route).departureTime("").travelTime("").build());
-                    oldIndexes.add(-1);
-                    table.updateUI();
-                    System.out.println((String) in.readObject());
-                } catch (ClassNotFoundException | IOException ex) {
-                    System.out.println("Ошибка\n" + ex.getMessage());
-                }
+                commandQueue.addLast("addNull");
+                Route route = Route.builder().departure("").destination("").build();
+                model.addTransport(Train.builder().index(-1).route(route).departureTime("").travelTime("").build());
+                oldIndexes.add(-1);
+                table.updateUI();
             }
         };
     }
@@ -168,14 +161,22 @@ public class SwingView extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
+                    System.out.println("На сервер отправлена команда: " + command);
+
+                    /* Если обнавляем данные, то не сохраняем внесенные ранее изменения */
+                    if (command.equals("show"))
+                        commandQueue.clear();
+
+                    pushCommandsToServer();
                     out.writeObject(command);
                     out.flush();
 
                     /* Получаем список с сервера, собираем модель */
                     java.util.List<Transport> transportList = (java.util.List<Transport>) in.readObject();
                     oldIndexes = new ArrayList<>();
-                    for (Transport transport : transportList)
+                    for (Transport transport : transportList) {
                         oldIndexes.add(transport.getIndex());
+                    }
                     model = new TransportModel(transportList);
                     model.addTableModelListener(setTransportListener());
 
@@ -190,64 +191,57 @@ public class SwingView extends JFrame {
         };
     }
 
+    /* Сохранить изменения на сервер */
+    private void pushCommandsToServer() {
+        while (!commandQueue.isEmpty()) {
+            try {
+                String command = commandQueue.removeFirst();
+                System.out.println("-------------------------------------------------------");
+                System.out.println("На сервер отправлена команда: " + command);
+                out.writeObject(command);
+                out.flush();
+                Object answer = in.readObject();
+                System.out.println("Ответ сервера: " + answer);
+            } catch (IOException | ClassNotFoundException ex) {
+                System.out.println(ex.getMessage());
+            }
+        }
+        System.out.println("-------------------------------------------------------");
+    }
+
     /* Событие: изменили значение ячейки таблицы */
     private TableModelListener setTransportListener() {
         return new TableModelListener() {
             @Override
             public void tableChanged(TableModelEvent e) {
+
                 int row = table.getEditingRow();
                 int column = table.getEditingColumn();
                 System.out.println(String.format("Table changed at (%d,%d)", row, column));
 
-                /* запрос к серверу на изменение поезда */
+                /* запрос к серверу на изменение транспорта */
                 int index = oldIndexes.get(row);
-                try {
-                    out.writeObject("set " + index);
-                    out.flush();
-                    Object answer = in.readObject();
-                    if (answer instanceof String) {
-                        System.out.println((String) answer);
-                        return;
-                    }
-                } catch (IOException | ClassNotFoundException ex) {
-                    ex.printStackTrace();
-                }
+                commandQueue.addLast("set " + index);
 
                 /* Запрос серверу, что конкретно меняем в выбранном транспорте */
-                String buffer = "";
                 switch (column) {
                     case 0:
-                        buffer = "index " + table.getValueAt(row, column);
+                        commandQueue.addLast("index " + table.getValueAt(row, column));
                         oldIndexes.set(row, (Integer) table.getValueAt(row, column));
                         break;
                     case 1:
-                        buffer = "route " + table.getValueAt(row, column);
+                        commandQueue.addLast("route " + table.getValueAt(row, column));
                         break;
                     case 2:
-                        buffer = "dTime " + table.getValueAt(row, column);
+                        commandQueue.addLast("dTime " + table.getValueAt(row, column));
                         break;
                     case 3:
-                        buffer = "tTime " + table.getValueAt(row, column);
+                        commandQueue.addLast("tTime " + table.getValueAt(row, column));
                         break;
-                }
-
-                try {
-                    out.writeObject(buffer);
-                    out.flush();
-                    System.out.println((String) in.readObject());
-                } catch (IOException | ClassNotFoundException ex) {
-                    ex.printStackTrace();
                 }
 
                 /* Запрос серверу на выход из редактирования транспорта */
-                try {
-                    out.writeObject("return");
-                    out.flush();
-                    System.out.println((String) in.readObject());
-                } catch (IOException | ClassNotFoundException ex) {
-                    ex.printStackTrace();
-                }
-
+                commandQueue.addLast("return");
             }
         };
     }

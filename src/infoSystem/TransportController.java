@@ -2,9 +2,6 @@ package infoSystem;
 
 import infoSystem.model.*;
 
-import java.util.Collections;
-import java.util.List;
-
 public class TransportController
 {
     private Model model;
@@ -32,6 +29,6 @@ public class TransportController
     }
 
     public synchronized void sortByDepartureTime() {
-        model.getTransports().sort(Transport.departureTimeComparator);
+        model.getTransports().sort(new DepartureTimeComparator());
     }
 }

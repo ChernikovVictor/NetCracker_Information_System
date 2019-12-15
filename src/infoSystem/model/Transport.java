@@ -16,11 +16,4 @@ public interface Transport extends Serializable
 
     String getTravelTime();
     void setTravelTime(String travelTime);
-
-    Comparator<Transport> departureTimeComparator = new Comparator<Transport>() {
-        @Override
-        public int compare(Transport o1, Transport o2) {
-            return o1.getDepartureTime().compareTo(o2.getDepartureTime());
-        }
-    };
 }
