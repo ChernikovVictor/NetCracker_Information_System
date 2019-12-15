@@ -15,7 +15,7 @@ public class Server {
     private static LinkedList<ServerThread> serverThreads = new LinkedList<>(); // список всех нитей
     private static ServerSocket server;
     private static final int PORT = 4004;
-    private static final String FILENAME = "FILE.bin";
+    private static final String FILENAME = "FILE.xml";
 
     public static void main(String[] args) {
         Model model = null;
@@ -25,7 +25,7 @@ public class Server {
             System.out.println("Сервер запущен");
 
             /* Получаем данные из файла */
-            model = new TransportModel(SaveData.deserializeTransports(FILENAME));
+            model = new TransportModel(SaveData.getFromXML(FILENAME));
             controller = new TransportController(model);
             System.out.println("Считали из файла список транспортов");
             (new ConsoleView()).showAllTransports(model);
@@ -41,7 +41,7 @@ public class Server {
             System.out.println("Получена команда завершения работы сервера");
         } finally {
             System.out.println("Сервер завершил работу");
-            SaveData.serializeTransports(model.getTransports(), FILENAME);
+            SaveData.saveAsXML(model.getTransports(), FILENAME);
             try {
                 server.close();
             } catch (IOException e) {

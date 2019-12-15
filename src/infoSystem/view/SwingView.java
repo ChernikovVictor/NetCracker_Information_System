@@ -3,11 +3,14 @@ package infoSystem.view;
 import infoSystem.model.*;
 
 import javax.swing.*;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class SwingView extends JFrame {
 
@@ -18,6 +21,9 @@ public class SwingView extends JFrame {
 
     private Model model = new TransportModel();
     private JTable table;
+
+    /* Список номеров поездов, полученных с сервера (нужен для корректного редактирования номера поезда) */
+    private ArrayList<Integer> oldIndexes;
 
     public SwingView() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -41,15 +47,6 @@ public class SwingView extends JFrame {
 
         /* Создаем пустую таблицу */
         table = createJTable();
-
-        /*KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
-        table.getInputMap().put(enter, "enter");
-        table.getActionMap().put("enter", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("нажали enter");
-            }
-        });*/
 
         /* Поместим таблицу на панель */
         JScrollPane scrollPane = new JScrollPane(table);
@@ -134,7 +131,9 @@ public class SwingView extends JFrame {
                     out.writeObject("rm " + index);
                     out.flush();
                     model.removeTransport(index);
+                    oldIndexes.remove(index);
                     table.updateUI();
+
                     System.out.println((String) in.readObject());
                 } catch (ClassNotFoundException | IOException ex) {
                     System.out.println("Ошибка\n" + ex.getMessage());
@@ -153,6 +152,7 @@ public class SwingView extends JFrame {
                     out.flush();
                     Route route = Route.builder().departure("").destination("").build();
                     model.addTransport(Train.builder().index(-1).route(route).departureTime("").travelTime("").build());
+                    oldIndexes.add(-1);
                     table.updateUI();
                     System.out.println((String) in.readObject());
                 } catch (ClassNotFoundException | IOException ex) {
@@ -170,7 +170,15 @@ public class SwingView extends JFrame {
                 try {
                     out.writeObject(command);
                     out.flush();
-                    model = new TransportModel((java.util.List<Transport>) in.readObject());
+
+                    /* Получаем список с сервера, собираем модель */
+                    java.util.List<Transport> transportList = (java.util.List<Transport>) in.readObject();
+                    oldIndexes = new ArrayList<>();
+                    for (Transport transport : transportList)
+                        oldIndexes.add(transport.getIndex());
+                    model = new TransportModel(transportList);
+                    model.addTableModelListener(setTransportListener());
+
                     table.setModel(model);
                     table.updateUI();
                     System.out.println("Список транспортов, полученный с сервера");
@@ -178,6 +186,68 @@ public class SwingView extends JFrame {
                 } catch (ClassNotFoundException | IOException ex) {
                     System.out.println("Ошибка\n" + ex.getMessage());
                 }
+            }
+        };
+    }
+
+    /* Событие: изменили значение ячейки таблицы */
+    private TableModelListener setTransportListener() {
+        return new TableModelListener() {
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                int row = table.getEditingRow();
+                int column = table.getEditingColumn();
+                System.out.println(String.format("Table changed at (%d,%d)", row, column));
+
+                /* запрос к серверу на изменение поезда */
+                int index = oldIndexes.get(row);
+                try {
+                    out.writeObject("set " + index);
+                    out.flush();
+                    Object answer = in.readObject();
+                    if (answer instanceof String) {
+                        System.out.println((String) answer);
+                        return;
+                    }
+                } catch (IOException | ClassNotFoundException ex) {
+                    ex.printStackTrace();
+                }
+
+                /* Запрос серверу, что конкретно меняем в выбранном транспорте */
+                String buffer = "";
+                switch (column) {
+                    case 0:
+                        buffer = "index " + table.getValueAt(row, column);
+                        oldIndexes.set(row, (Integer) table.getValueAt(row, column));
+                        break;
+                    case 1:
+                        buffer = "route " + table.getValueAt(row, column);
+                        break;
+                    case 2:
+                        buffer = "dTime " + table.getValueAt(row, column);
+                        break;
+                    case 3:
+                        buffer = "tTime " + table.getValueAt(row, column);
+                        break;
+                }
+
+                try {
+                    out.writeObject(buffer);
+                    out.flush();
+                    System.out.println((String) in.readObject());
+                } catch (IOException | ClassNotFoundException ex) {
+                    ex.printStackTrace();
+                }
+
+                /* Запрос серверу на выход из редактирования транспорта */
+                try {
+                    out.writeObject("return");
+                    out.flush();
+                    System.out.println((String) in.readObject());
+                } catch (IOException | ClassNotFoundException ex) {
+                    ex.printStackTrace();
+                }
+
             }
         };
     }

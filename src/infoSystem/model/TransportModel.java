@@ -1,16 +1,14 @@
 package infoSystem.model;
 
-import javax.swing.event.TableModelListener;
+import javax.swing.table.AbstractTableModel;
 import java.io.Serializable;
 import java.util.*;
 
-public class TransportModel implements Model, Serializable
+public class TransportModel extends AbstractTableModel implements Model, Serializable
 {
-    private Set<TableModelListener> listeners = new HashSet<TableModelListener>();
     private List<Transport> transports;
 
-    public TransportModel()
-    {
+    public TransportModel() {
         transports = new ArrayList<>();
     }
 
@@ -133,15 +131,6 @@ public class TransportModel implements Model, Serializable
                 transport.setTravelTime((String) aValue);
                 break;
         }
-    }
-
-    @Override
-    public void addTableModelListener(TableModelListener l) {
-        listeners.add(l);
-    }
-
-    @Override
-    public void removeTableModelListener(TableModelListener l) {
-        listeners.remove(l);
+        fireTableCellUpdated(rowIndex, columnIndex); // Сообщить слушателям об изменении в модели
     }
 }

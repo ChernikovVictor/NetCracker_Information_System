@@ -1,12 +1,17 @@
 package infoSystem.model;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 import java.io.Serializable;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@XmlRootElement(name = "train")
+@XmlType(propOrder = {"index", "route", "departureTime", "travelTime"})
 public class Train implements Transport, Serializable
 {
     private int index;  // номер поезда
