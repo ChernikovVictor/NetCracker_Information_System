@@ -18,4 +18,9 @@ public class Train implements Transport, Serializable
     private Route route;
     private String departureTime;   // время отправления
     private String travelTime;      // время в пути
+
+    @Override
+    public String toString() {
+        return String.format("%d %s %s %s", index, route.toString(), departureTime, travelTime);
+    }
 }

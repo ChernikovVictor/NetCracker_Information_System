@@ -129,6 +129,13 @@ public class ServerThread extends Thread {
                         System.out.println("Список, переданный клиенту:");
                         (new ConsoleView()).showAllTransports(model);
                         break;
+                    case "search":
+                        String regex = command.substring(posSpace + 1);
+                        Model patternModel = controller.getModelByPattern(regex);
+                        out.writeObject(patternModel.getTransports());
+                        System.out.println("Список, переданный клиенту:");
+                        (new ConsoleView()).showAllTransports(patternModel);
+                        break;
                     case "exit":
                         break;
                     case "help":
@@ -260,6 +267,7 @@ public class ServerThread extends Thread {
                 "Удалить поезд: rm \"index\"\n" +
                 "Показать все поезда: show\n" +
                 "Сортировать по времени отправления: sort\n" +
+                "Поиск по шаблону: search \"regex\"\n" +
                 "Выход: exit";
     }
 

@@ -22,6 +22,7 @@ public class SwingView extends JFrame {
 
     private Model model = new TransportModel();
     private JTable table;
+    private TextField searchTextField;
 
     /* Очередь команд, ожидающих отправки на сервер */
     private ArrayDeque<String> commandQueue = new ArrayDeque<>();
@@ -33,6 +34,7 @@ public class SwingView extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("Справочная система");
         this.addWindowListener(windowListener());
+        this.setLayout(new BorderLayout(10, 10));
 
         /* подключаемся к серверу */
         try {
@@ -58,17 +60,27 @@ public class SwingView extends JFrame {
 
         /* Создадим кнопку получения данных с сервера */
         JButton updateButton = createButton("Обновить данные с сервера");
-        updateButton.addActionListener(updateOrSortButtonPressed("show"));
+        updateButton.addActionListener(updateButtonPressed());
 
-        /* Добавим панель для кнопки обновления */
+        /* Создадим строку поиска и кнопку для инициации поиска */
+        searchTextField = new TextField();
+        searchTextField.setPreferredSize(new Dimension(400, 30));
+        searchTextField.setFont(new Font("Arial", Font.PLAIN, 15));
+        JButton searchButton = createButton("Поиск");
+        searchButton.addActionListener(searchButtonPressed());
+        JPanel searchPanel = new JPanel();
+        searchPanel.add(searchTextField);
+        searchPanel.add(searchButton);
+
+        /* Добавим панель для кнопки обновления и панели поиска */
         JPanel northPanel = new JPanel();
-        northPanel.add(updateButton);
-        northPanel.setBounds(100, 100, 300, 100);
+        northPanel.setLayout(new BorderLayout());
+        northPanel.add(searchPanel, BorderLayout.LINE_START);
+        northPanel.add(updateButton, BorderLayout.LINE_END);
 
         /* Добавим панель для кнопок снизу таблицы */
         JPanel southPanel = new JPanel();
         southPanel.setLayout(new FlowLayout());
-        southPanel.setBounds(900, 550, 400, 100);
 
         /* Кнопка "Добавить" */
         JButton addButton = createButton("Добавить");
@@ -82,7 +94,7 @@ public class SwingView extends JFrame {
 
         /* Кнопка "Сортировать" */
         JButton sortButton = createButton("Сортировать");
-        sortButton.addActionListener(updateOrSortButtonPressed("sort"));
+        sortButton.addActionListener(sortButtonPressed());
         southPanel.add(sortButton);
 
         /* Кнопка "Сохранить изменения" */
@@ -91,9 +103,9 @@ public class SwingView extends JFrame {
         southPanel.add(saveButton);
 
         /* Добавляем панели во фрейм */
-        getContentPane().add(southPanel);
-        getContentPane().add(scrollPane);
-        getContentPane().add(northPanel);
+        getContentPane().add(southPanel, BorderLayout.PAGE_END);
+        getContentPane().add(scrollPane, BorderLayout.CENTER);
+        getContentPane().add(northPanel, BorderLayout.PAGE_START);
 
         /* Устанавливаем размеры окна, делаем его видимым */
         setPreferredSize(new Dimension(1400, 700));
@@ -155,40 +167,77 @@ public class SwingView extends JFrame {
         };
     }
 
-    /* Событие: нажали на кнопку "Обновить" или "Сортировать */
-    private ActionListener updateOrSortButtonPressed(String command) {
+    /* Событие: нажали на кнопку "Поиск" */
+    private ActionListener searchButtonPressed() {
         return new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                System.out.println("Нажали кнопку Поиск");
+                if (searchTextField.getText().equals("")) {
+                    return;
+                }
                 try {
-                    System.out.println("На сервер отправлена команда: " + command);
-
-                    /* Если обнавляем данные, то не сохраняем внесенные ранее изменения */
-                    if (command.equals("show"))
-                        commandQueue.clear();
-
                     pushCommandsToServer();
-                    out.writeObject(command);
+                    out.writeObject("search " + searchTextField.getText());
                     out.flush();
-
-                    /* Получаем список с сервера, собираем модель */
-                    java.util.List<Transport> transportList = (java.util.List<Transport>) in.readObject();
-                    oldIndexes = new ArrayList<>();
-                    for (Transport transport : transportList) {
-                        oldIndexes.add(transport.getIndex());
-                    }
-                    model = new TransportModel(transportList);
-                    model.addTableModelListener(setTransportListener());
-
-                    table.setModel(model);
-                    table.updateUI();
-                    System.out.println("Список транспортов, полученный с сервера");
-                    (new ConsoleView()).showAllTransports(model);
+                    getTransportsFromServer();
                 } catch (ClassNotFoundException | IOException ex) {
                     System.out.println("Ошибка\n" + ex.getMessage());
                 }
             }
         };
+    }
+
+    /* Событие: нажали на кнопку "Обновить" */
+    private ActionListener updateButtonPressed() {
+        return new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("На сервер отправлена команда: show");
+                try {
+                    commandQueue.clear();
+                    out.writeObject("show");
+                    out.flush();
+                    getTransportsFromServer();
+                } catch (ClassNotFoundException | IOException ex) {
+                    System.out.println("Ошибка\n" + ex.getMessage());
+                }
+            }
+        };
+    }
+
+    /* Событие: нажали на кнопку "Сортировать" */
+    private ActionListener sortButtonPressed() {
+        return new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("На сервер отправлена команда: sort");
+                try {
+                    pushCommandsToServer();
+                    out.writeObject("sort");
+                    out.flush();
+                    getTransportsFromServer();
+                } catch (ClassNotFoundException | IOException ex) {
+                    System.out.println("Ошибка\n" + ex.getMessage());
+                }
+            }
+        };
+    }
+
+    /* Получаем список с сервера, собираем модель */
+    private void getTransportsFromServer() throws IOException, ClassNotFoundException {
+        java.util.List<Transport> transportList = (java.util.List<Transport>) in.readObject();
+        oldIndexes = new ArrayList<>();
+        for (Transport transport : transportList) {
+            oldIndexes.add(transport.getIndex());
+        }
+        model = new TransportModel(transportList);
+        model.addTableModelListener(setTransportListener());
+
+        table.setModel(model);
+        table.updateUI();
+        System.out.println("Список транспортов, полученный с сервера");
+        (new ConsoleView()).showAllTransports(model);
     }
 
     /* Сохранить изменения на сервер */
