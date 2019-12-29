@@ -23,4 +23,13 @@ public class Train implements Transport, Serializable
     public String toString() {
         return String.format("%d %s %s %s", index, route.toString(), departureTime, travelTime);
     }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == this)
+            return true;
+        if (!(object instanceof Train))
+            return false;
+        return this.toString().equals(object.toString());
+    }
 }

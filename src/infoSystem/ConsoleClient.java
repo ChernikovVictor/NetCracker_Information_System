@@ -7,7 +7,7 @@ import java.util.Scanner;
 import infoSystem.model.*;
 import infoSystem.view.*;
 
-public class Client {
+public class ConsoleClient {
 
     private static Socket clientSocket;
     private static ObjectInputStream in;
@@ -50,7 +50,7 @@ public class Client {
                     } else if (answer instanceof Transport) {
                         view.showTransport((Transport) answer);
                     } else if (answer instanceof List<?>) {
-                        view.showAllTransports(new TransportModel((List<Transport>) answer));
+                        view.showAllTransports(new XmlTransportModel((List<Transport>) answer));
                     }
                 }
 

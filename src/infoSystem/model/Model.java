@@ -11,4 +11,7 @@ public interface Model extends Serializable, TableModel
     Transport getTransport(int index);
     void setTransport(int index, Transport transport);
     List<Transport> getTransports();
+    void downloadTransports(String filename);
+    void saveTransports(String filename);
+    boolean contains(Transport transport);
 }

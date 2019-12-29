@@ -1,11 +1,14 @@
 package infoSystem.server;
 
+import infoSystem.util.BinaryLoader;
 import infoSystem.TransportController;
+import infoSystem.util.XmlLoader;
 import infoSystem.model.*;
 import infoSystem.view.ConsoleView;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.List;
 
 /* Поток для работы с очередным клиентом */
 public class ServerThread extends Thread {
@@ -13,14 +16,17 @@ public class ServerThread extends Thread {
     private Socket socket;
     private ObjectInputStream in;
     private ObjectOutputStream out;
-    private TransportController controller;
-    private Model model;
+    private TransportController controller = null;
+    private Model model = null;
 
-    public ServerThread(Socket socket, Model model, TransportController controller) throws IOException,
-            ClassNotFoundException, DisableServerException {
+    private final TransportController binaryController;
+    private final TransportController xmlController;
+
+    public ServerThread(Socket socket, TransportController binaryController, TransportController xmlController)
+            throws IOException, ClassNotFoundException, DisableServerException {
         this.socket = socket;
-        this.controller = controller;
-        this.model = model;
+        this.binaryController = binaryController;
+        this.xmlController = xmlController;
         out = new ObjectOutputStream(socket.getOutputStream());
         in = new ObjectInputStream(socket.getInputStream());
 
@@ -55,6 +61,13 @@ public class ServerThread extends Thread {
                 if (posSpace == -1)
                     posSpace = command.length();
                 switch (command.substring(0, posSpace)) {
+                    case "switch":
+                        String modelType = command.substring(posSpace + 1);
+                        controller = (modelType.equals("bin")) ? binaryController : xmlController;
+                        model = controller.getModel();
+                        System.out.println("Файл данных изменен");
+                        out.writeObject("Файл данных изменен");
+                        break;
                     case "get":
                         try {
                             int index = Integer.parseInt(command.substring(posSpace + 1));
@@ -135,6 +148,37 @@ public class ServerThread extends Thread {
                         out.writeObject(patternModel.getTransports());
                         System.out.println("Список, переданный клиенту:");
                         (new ConsoleView()).showAllTransports(patternModel);
+                        break;
+                    case "merge":
+                        File file;
+                        try {
+                            file = (File) in.readObject();
+                        } catch (ClassNotFoundException e) {
+                            e.printStackTrace();
+                            break;
+                        }
+
+                        String extension = file.getPath().substring(file.getPath().lastIndexOf("."));
+                        List<Transport> transportList = null;
+                        switch (extension) {
+                            case ".bin":
+                                transportList = BinaryLoader.deserializeList(file);
+                                break;
+                            case ".xml":
+                                transportList = XmlLoader.getFromXML(file);
+                                break;
+                        }
+                        controller.merge(transportList);
+
+                        String answer = (transportList == null) ? "Считать не удалось. Проверьте содержимое файла"
+                                                                : "Данные успешно добавлены на сервер";
+                        System.out.println(answer);
+                        try {
+                            out.writeObject(answer);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
                         break;
                     case "exit":
                         break;
@@ -268,6 +312,7 @@ public class ServerThread extends Thread {
                 "Показать все поезда: show\n" +
                 "Сортировать по времени отправления: sort\n" +
                 "Поиск по шаблону: search \"regex\"\n" +
+                "Выбрать файл для загрузки данных: switch \"bin\" switch \"xml\"\n" +
                 "Выход: exit";
     }
 

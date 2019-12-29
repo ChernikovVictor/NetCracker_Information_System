@@ -1,4 +1,4 @@
-package infoSystem;
+package infoSystem.util;
 
 import infoSystem.model.Transport;
 

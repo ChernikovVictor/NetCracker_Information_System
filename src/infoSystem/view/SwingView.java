@@ -20,7 +20,7 @@ public class SwingView extends JFrame {
     private ObjectOutputStream out;
     private final int PORT = 4004;
 
-    private Model model = new TransportModel();
+    private Model model = new XmlTransportModel();
     private JTable table;
     private TextField searchTextField;
 
@@ -45,11 +45,17 @@ public class SwingView extends JFrame {
 
             /* Отправим команду, что хотим работать, а не выключить сервер */
             out.writeObject("work");
+            out.writeObject("switch xml");
+            System.out.println((String) in.readObject());
             out.flush();
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             System.out.println("Не удалось подключиться к серверу");
             System.out.println(e.getMessage());
         }
+
+        /* Создаем меню */
+        JMenuBar menuBar = createMenuBar();
+        setJMenuBar(menuBar);
 
         /* Создаем пустую таблицу */
         table = createJTable();
@@ -75,7 +81,7 @@ public class SwingView extends JFrame {
         /* Добавим панель для кнопки обновления и панели поиска */
         JPanel northPanel = new JPanel();
         northPanel.setLayout(new BorderLayout());
-        northPanel.add(searchPanel, BorderLayout.LINE_START);
+        northPanel.add(searchPanel, BorderLayout.CENTER);
         northPanel.add(updateButton, BorderLayout.LINE_END);
 
         /* Добавим панель для кнопок снизу таблицы */
@@ -112,6 +118,77 @@ public class SwingView extends JFrame {
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
+    }
+
+    private JMenuBar createMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
+
+        /* Пункт меню для выбора моделей на сервере */
+        JMenu modelTypeMenu = new JMenu("Загрузить из...");
+        modelTypeMenu.setFont(new Font("Arial", Font.PLAIN, 15));
+        menuBar.add(modelTypeMenu);
+
+        JRadioButtonMenuItem binaryType = new JRadioButtonMenuItem("Двоичного файла");
+        binaryType.setFont(new Font("Arial", Font.PLAIN, 15));
+        modelTypeMenu.add(binaryType);
+        binaryType.addActionListener(listener -> {
+            System.out.println("Нажали на пункт меню \"Двоичный файл\"");
+            try {
+                commandQueue.clear();
+                out.writeObject("switch bin");
+                out.flush();
+                System.out.println((String) in.readObject());
+            } catch (IOException | ClassNotFoundException ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        JRadioButtonMenuItem xmlType = new JRadioButtonMenuItem("Файла xml");
+        xmlType.setFont(new Font("Arial", Font.PLAIN, 15));
+        xmlType.setSelected(true);
+        modelTypeMenu.add(xmlType);
+        xmlType.addActionListener(listener -> {
+            System.out.println("Нажали на пункт меню \"xml файл\"");
+            try {
+                commandQueue.clear();
+                out.writeObject("switch xml");
+                out.flush();
+                System.out.println((String) in.readObject());
+            } catch (IOException | ClassNotFoundException ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        ButtonGroup buttonGroup = new ButtonGroup();
+        buttonGroup.add(binaryType);
+        buttonGroup.add(xmlType);
+
+        /* Пункт меню для загрузки данных на сервер */
+        JMenu addTransportsMenu = new JMenu("Добавить на сервер");
+        addTransportsMenu.setFont(new Font("Arial", Font.PLAIN, 15));
+        menuBar.add(addTransportsMenu);
+
+        JMenuItem fromFile = new JMenuItem("Из файла...");
+        fromFile.setFont(new Font("Arial", Font.PLAIN, 15));
+        addTransportsMenu.add(fromFile);
+        fromFile.addActionListener(listener -> {
+            /* Выбираем файл и отправляем на сервер */
+            JFileChooser fileChooser = new JFileChooser(new File("."));
+            fileChooser.setDialogTitle("Выберите файл");
+            if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                try {
+                    pushCommandsToServer();
+                    out.writeObject("merge");
+                    out.writeObject(fileChooser.getSelectedFile());
+                    out.flush();
+                    JOptionPane.showMessageDialog(null, in.readObject());
+                } catch (ClassNotFoundException | IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        return menuBar;
     }
 
     private JButton createButton(String text) {
@@ -231,7 +308,7 @@ public class SwingView extends JFrame {
         for (Transport transport : transportList) {
             oldIndexes.add(transport.getIndex());
         }
-        model = new TransportModel(transportList);
+        model = new XmlTransportModel(transportList);
         model.addTableModelListener(setTransportListener());
 
         table.setModel(model);

@@ -1,6 +1,7 @@
 package infoSystem;
 
 import infoSystem.model.*;
+import infoSystem.util.DepartureTimeComparator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +52,18 @@ public class TransportController
             }
         }
 
-        return new TransportModel(transports);
+        return (model instanceof XmlTransportModel) ? new XmlTransportModel(transports) : new BinaryTransportModel();
+    }
+
+    /* Добавить в модель данные, исключая дубликаты */
+    public synchronized void merge(List<Transport> transports) {
+        if (transports == null) {
+            return;
+        }
+        for (Transport transport : transports) {
+            if (!model.contains(transport)) {
+                model.addTransport(transport);
+            }
+        }
     }
 }

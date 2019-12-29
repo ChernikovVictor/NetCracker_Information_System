@@ -4,9 +4,9 @@ import javax.swing.table.AbstractTableModel;
 import java.io.Serializable;
 import java.util.*;
 
-public class TransportModel extends AbstractTableModel implements Model, Serializable
+public abstract class TransportModel extends AbstractTableModel implements Model, Serializable
 {
-    private List<Transport> transports;
+    protected List<Transport> transports;
 
     public TransportModel() {
         transports = new ArrayList<>();
@@ -53,6 +53,11 @@ public class TransportModel extends AbstractTableModel implements Model, Seriali
                 return;
             }
         }
+    }
+
+    @Override
+    public boolean contains(Transport transport) {
+        return transports.contains(transport);
     }
 
     /* Методы интерфейса TableModel */
