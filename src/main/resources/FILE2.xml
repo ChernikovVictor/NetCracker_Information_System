@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<transportListWrapper>
+    <transports>
+        <train>
+            <index>111</index>
+            <route>
+                <departure>Казань</departure>
+                <destination>Брянск</destination>
+            </route>
+            <departureTime>07:30</departureTime>
+            <travelTime>4 часа</travelTime>
+        </train>
+        <train>
+            <index>222</index>
+            <route>
+                <departure>Москва</departure>
+                <destination>Калининград</destination>
+            </route>
+            <departureTime>09:00</departureTime>
+            <travelTime>2 часа 15 минут</travelTime>
+        </train>
+        <train>
+            <index>5</index>
+            <route>
+                <departure>Самара</departure>
+                <destination>Казань</destination>
+            </route>
+            <departureTime>03:00</departureTime>
+            <travelTime>1 час</travelTime>
+        </train>
+        <train>
+            <index>4</index>
+            <route>
+                <departure>Москва</departure>
+                <destination>Воронеж</destination>
+            </route>
+            <departureTime>11:15</departureTime>
+            <travelTime>3 часа</travelTime>
+        </train>
+        <train>
+            <index>9</index>
+            <route>
+                <departure>Томск</departure>
+                <destination>Екатеринбург</destination>
+            </route>
+            <departureTime>23:15</departureTime>
+            <travelTime>4 часа</travelTime>
+        </train>
+    </transports>
+</transportListWrapper>

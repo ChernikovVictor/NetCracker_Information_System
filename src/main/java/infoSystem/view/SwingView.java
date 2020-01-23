@@ -173,7 +173,7 @@ public class SwingView extends JFrame {
         addTransportsMenu.add(fromFile);
         fromFile.addActionListener(listener -> {
             /* Выбираем файл и отправляем на сервер */
-            JFileChooser fileChooser = new JFileChooser(new File("."));
+            JFileChooser fileChooser = new JFileChooser(new File("src\\main\\resources"));
             fileChooser.setDialogTitle("Выберите файл");
             if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 try {

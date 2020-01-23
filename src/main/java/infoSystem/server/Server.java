@@ -14,8 +14,8 @@ public class Server {
     private static LinkedList<ServerThread> serverThreads = new LinkedList<>(); // список всех нитей
     private static ServerSocket server;
     private static final int PORT = 4004;
-    private static final String FILENAME_XML = "FILE.xml";
-    private static final String FILENAME_BIN = "FILE.bin";
+    private static final String FILENAME_XML = "src\\main\\resources\\FILE.xml";
+    private static final String FILENAME_BIN = "src\\main\\resources\\FILE.bin";
 
     public static void main(String[] args) {
         XmlTransportModel xmlTransportModel = new XmlTransportModel();
