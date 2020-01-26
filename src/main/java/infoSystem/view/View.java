@@ -6,6 +6,7 @@ import infoSystem.model.Transport;
 public interface View
 {
     void showTransport(Transport transport);
-    void showTransport(int index, Model model);
     void showAllTransports(Model model);
+    String getTransportInfo(Transport transport);
+    String getAllTransportsInfo(Model model);
 }

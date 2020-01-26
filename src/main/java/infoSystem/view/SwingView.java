@@ -1,6 +1,7 @@
 package infoSystem.view;
 
 import infoSystem.model.*;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -13,6 +14,7 @@ import java.net.Socket;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 
+@Slf4j
 public class SwingView extends JFrame {
 
     private Socket clientSocket;
@@ -41,16 +43,13 @@ public class SwingView extends JFrame {
             clientSocket = new Socket("localhost", PORT);
             out = new ObjectOutputStream(clientSocket.getOutputStream());
             in = new ObjectInputStream(clientSocket.getInputStream());
-            System.out.println("Клиент подключился к серверу");
+            log.info("Клиент подключился к серверу");
 
             /* Отправим команду, что хотим работать, а не выключить сервер */
             out.writeObject("work");
-            out.writeObject("switch xml");
-            System.out.println((String) in.readObject());
             out.flush();
-        } catch (IOException | ClassNotFoundException e) {
-            System.out.println("Не удалось подключиться к серверу");
-            System.out.println(e.getMessage());
+        } catch (IOException  e) {
+            log.error("Не удалось подключиться к серверу", e);
         }
 
         /* Создаем меню */
@@ -132,14 +131,14 @@ public class SwingView extends JFrame {
         binaryType.setFont(new Font("Arial", Font.PLAIN, 15));
         modelTypeMenu.add(binaryType);
         binaryType.addActionListener(listener -> {
-            System.out.println("Нажали на пункт меню \"Двоичный файл\"");
+            log.info("Нажали на пункт меню \"Двоичный файл\"");
             try {
                 commandQueue.clear();
                 out.writeObject("switch bin");
                 out.flush();
-                System.out.println((String) in.readObject());
+                log.info((String) in.readObject());
             } catch (IOException | ClassNotFoundException ex) {
-                ex.printStackTrace();
+                log.error(ex.getMessage(), ex);
             }
         });
 
@@ -148,14 +147,14 @@ public class SwingView extends JFrame {
         xmlType.setSelected(true);
         modelTypeMenu.add(xmlType);
         xmlType.addActionListener(listener -> {
-            System.out.println("Нажали на пункт меню \"xml файл\"");
+            log.info("Нажали на пункт меню \"xml файл\"");
             try {
                 commandQueue.clear();
                 out.writeObject("switch xml");
                 out.flush();
-                System.out.println((String) in.readObject());
+                log.info((String) in.readObject());
             } catch (IOException | ClassNotFoundException ex) {
-                ex.printStackTrace();
+                log.error(ex.getMessage(), ex);
             }
         });
 
@@ -183,7 +182,7 @@ public class SwingView extends JFrame {
                     out.flush();
                     JOptionPane.showMessageDialog(null, in.readObject());
                 } catch (ClassNotFoundException | IOException e) {
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                 }
             }
         });
@@ -219,6 +218,7 @@ public class SwingView extends JFrame {
         return new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                log.info("Нажали на кнопку \"Удалить\"");
                 if (table.getSelectedRow() == -1)
                     return;
                 int index = (int) table.getValueAt(table.getSelectedRow(), 0);
@@ -235,6 +235,7 @@ public class SwingView extends JFrame {
         return new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                log.info("Нажали на кнопку \"Добавить\"");
                 commandQueue.addLast("addNull");
                 Route route = Route.builder().departure("").destination("").build();
                 model.addTransport(Train.builder().index(-1).route(route).departureTime("").travelTime("").build());
@@ -249,7 +250,7 @@ public class SwingView extends JFrame {
         return new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Нажали кнопку Поиск");
+                log.info("Нажали на кнопку \"Поиск\"");
                 if (searchTextField.getText().equals("")) {
                     return;
                 }
@@ -259,25 +260,25 @@ public class SwingView extends JFrame {
                     out.flush();
                     getTransportsFromServer();
                 } catch (ClassNotFoundException | IOException ex) {
-                    System.out.println("Ошибка\n" + ex.getMessage());
+                    log.error("Ошибка", ex);
                 }
             }
         };
     }
 
-    /* Событие: нажали на кнопку "Обновить" */
+    /* Событие: нажали на кнопку "Обновить данные с сервера" */
     private ActionListener updateButtonPressed() {
         return new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("На сервер отправлена команда: show");
+                log.info("Нажали на кнопку \"Обновить данные с сервера\"");
                 try {
                     commandQueue.clear();
                     out.writeObject("show");
                     out.flush();
                     getTransportsFromServer();
                 } catch (ClassNotFoundException | IOException ex) {
-                    System.out.println("Ошибка\n" + ex.getMessage());
+                    log.error("Ошибка", ex);
                 }
             }
         };
@@ -288,14 +289,14 @@ public class SwingView extends JFrame {
         return new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("На сервер отправлена команда: sort");
+                log.info("Нажали на кнопку \"Обновить данные с сервера\"");
                 try {
                     pushCommandsToServer();
                     out.writeObject("sort");
                     out.flush();
                     getTransportsFromServer();
                 } catch (ClassNotFoundException | IOException ex) {
-                    System.out.println("Ошибка\n" + ex.getMessage());
+                    log.error("Ошибка", ex);
                 }
             }
         };
@@ -313,8 +314,7 @@ public class SwingView extends JFrame {
 
         table.setModel(model);
         table.updateUI();
-        System.out.println("Список транспортов, полученный с сервера");
-        (new ConsoleView()).showAllTransports(model);
+        log.info("Список транспортов, полученный с сервера\n{}", (new ConsoleView()).getAllTransportsInfo(model));
     }
 
     /* Сохранить изменения на сервер */
@@ -322,17 +322,17 @@ public class SwingView extends JFrame {
         while (!commandQueue.isEmpty()) {
             try {
                 String command = commandQueue.removeFirst();
-                System.out.println("-------------------------------------------------------");
-                System.out.println("На сервер отправлена команда: " + command);
+                log.info("-------------------------------------------------------");
+                log.info("На сервер отправлена команда: {}", command);
                 out.writeObject(command);
                 out.flush();
                 Object answer = in.readObject();
-                System.out.println("Ответ сервера: " + answer);
+                log.info("Ответ сервера: {}", answer);
             } catch (IOException | ClassNotFoundException ex) {
-                System.out.println(ex.getMessage());
+                log.error(ex.getMessage(), ex);
             }
         }
-        System.out.println("-------------------------------------------------------");
+        log.info("-------------------------------------------------------");
     }
 
     /* Событие: изменили значение ячейки таблицы */
@@ -343,7 +343,7 @@ public class SwingView extends JFrame {
 
                 int row = table.getEditingRow();
                 int column = table.getEditingColumn();
-                System.out.println(String.format("Table changed at (%d,%d)", row, column));
+                log.info("Table changed at ({},{})", row, column);
 
                 /* запрос к серверу на изменение транспорта */
                 int index = oldIndexes.get(row);
@@ -387,9 +387,9 @@ public class SwingView extends JFrame {
                     out.close();
                     clientSocket.close();
                 } catch (IOException ex) {
-                    System.out.println(ex.getMessage());
+                    log.error(ex.getMessage(), ex);
                 } finally {
-                    System.out.println("Клиент закончил работу");
+                    log.info("Клиент закончил работу");
                 }
             }
 

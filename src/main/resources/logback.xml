@@ -1,0 +1,60 @@
+<configuration>
+    <!-- Directory with log files -->
+    <property name="LOG_DIR" value="src\\main\\resources\\log"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoders are assigned the type
+             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder>
+            <pattern>%d{dd.MM.yyyy HH:mm:ss.SSS} [%thread] %-5level %logger{40} - %msg%n</pattern>
+        </encoder>
+
+        <!-- Only errors -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <appender name="FILE_APPENDER" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <!-- This is MDC value -->
+        <!-- We will assign a value to 'logFileName' via Java code -->
+        <discriminator>
+            <key>logFileName</key>
+            <defaultValue>log</defaultValue>
+        </discriminator>
+
+        <sift>
+            <!-- A standard FileAppender, the log file is based on 'logFileName' at runtime  -->
+            <appender name="FILE_${logFileName}" class="ch.qos.logback.core.FileAppender">
+                <file>${LOG_DIR}/${logFileName}.log</file>
+                <append>false</append>
+
+                <encoder>
+                    <pattern>%d{dd.MM.yyyy HH:mm:ss.SSS} [%thread] %-5level  %logger{40} - %msg%n</pattern>
+                </encoder>
+            </appender>
+        </sift>
+    </appender>
+
+    <appender name="SwingViewAppender" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_DIR}/SwingView.log</file>
+        <append>false</append>
+
+        <encoder>
+            <pattern>%d{dd.MM.yyyy HH:mm:ss.SSS} [%thread] %-5level  %logger{40} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="infoSystem.view.SwingView" level="DEBUG" additivity="false">
+        <appender-ref ref="SwingViewAppender"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <root level="DEBUG">
+        <appender-ref ref="FILE_APPENDER"/>
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+</configuration>

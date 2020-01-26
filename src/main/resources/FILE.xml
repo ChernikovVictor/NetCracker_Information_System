@@ -2,7 +2,16 @@
 <transportListWrapper>
     <transports>
         <train>
-            <index>18</index>
+            <index>5</index>
+            <route>
+                <departure>Самара</departure>
+                <destination>Казань</destination>
+            </route>
+            <departureTime>03:00</departureTime>
+            <travelTime>1 час 20 минут</travelTime>
+        </train>
+        <train>
+            <index>12</index>
             <route>
                 <departure>Казань</departure>
                 <destination>Брянск</destination>
@@ -11,27 +20,27 @@
             <travelTime>4 часа</travelTime>
         </train>
         <train>
+            <index>6</index>
+            <route>
+                <departure>Саратов</departure>
+                <destination>Оренбург</destination>
+            </route>
+            <departureTime>06:15</departureTime>
+            <travelTime>1 час 30 минут</travelTime>
+        </train>
+        <train>
             <index>8</index>
             <route>
                 <departure>Москва</departure>
                 <destination>Калининград</destination>
             </route>
-            <departureTime>09:00</departureTime>
+            <departureTime>06:00</departureTime>
             <travelTime>2 часа 15 минут</travelTime>
         </train>
         <train>
-            <index>5</index>
+            <index>7</index>
             <route>
-                <departure>Самара</departure>
-                <destination>Казань</destination>
-            </route>
-            <departureTime>03:00</departureTime>
-            <travelTime>1 час</travelTime>
-        </train>
-        <train>
-            <index>4</index>
-            <route>
-                <departure>Москва</departure>
+                <departure>Пермь</departure>
                 <destination>Воронеж</destination>
             </route>
             <departureTime>11:15</departureTime>
@@ -43,17 +52,8 @@
                 <departure>Томск</departure>
                 <destination>Екатеринбург</destination>
             </route>
-            <departureTime>23:15</departureTime>
+            <departureTime>10:15</departureTime>
             <travelTime>4 часа</travelTime>
-        </train>
-        <train>
-            <index>6</index>
-            <route>
-                <departure>Саратов</departure>
-                <destination>Кострома</destination>
-            </route>
-            <departureTime>08:15</departureTime>
-            <travelTime>1 час 30 минут</travelTime>
         </train>
     </transports>
 </transportListWrapper>

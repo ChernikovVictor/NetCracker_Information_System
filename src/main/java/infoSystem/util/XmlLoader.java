@@ -1,11 +1,13 @@
 package infoSystem.util;
 
 import infoSystem.model.Transport;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.xml.bind.*;
 import java.io.File;
 import java.util.List;
 
+@Slf4j
 public class XmlLoader {
 
     /* Получить список траспортов из XML файла */
@@ -19,10 +21,10 @@ public class XmlLoader {
             JAXBContext jaxbContext = JAXBContext.newInstance(TransportListWrapper.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             TransportListWrapper wrapper = (TransportListWrapper) unmarshaller.unmarshal(file);
-            System.out.println("Данные успешно загружены из " + file.getName());
+            log.info("Данные успешно загружены из {}", file.getName());
             return wrapper.getTransports();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             return null;
         }
     }
@@ -35,9 +37,9 @@ public class XmlLoader {
             Marshaller marshaller = context.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE); // флаг для читабельного вывода XML в JAXB
             marshaller.marshal(wrapper, new File(filename));
-            System.out.println("Данные успешно сохранены в " + filename);
+            log.info("Данные успешно сохранены в {}", filename);
         } catch (JAXBException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 }
