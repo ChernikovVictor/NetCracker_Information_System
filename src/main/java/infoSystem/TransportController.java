@@ -66,4 +66,12 @@ public class TransportController
             }
         }
     }
+
+    public synchronized void downloadTransports(String filename) {
+        model.downloadTransports(filename);
+    }
+
+    public synchronized void saveTransports(String filename) {
+        model.saveTransports(filename);
+    }
 }

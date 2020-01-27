@@ -1,0 +1,23 @@
+package infoSystem.server.commands;
+
+import infoSystem.TransportController;
+import infoSystem.model.Model;
+import infoSystem.server.ServerCommands;
+import infoSystem.view.ConsoleView;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+public class CommandSearch extends Command {
+
+    public CommandSearch(String parameter) {
+        setCommandID(ServerCommands.SEARCH);
+        setParameter(parameter);
+    }
+
+    @Override
+    public Object execute(TransportController controller) {
+        Model patternModel = controller.getModelByPattern(getParameter());
+        log.info("Список, переданный клиенту:\n{}", (new ConsoleView()).getAllTransportsInfo(patternModel));
+        return patternModel.getTransports();
+    }
+}

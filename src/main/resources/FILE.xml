@@ -7,7 +7,7 @@
                 <departure>Самара</departure>
                 <destination>Казань</destination>
             </route>
-            <departureTime>03:00</departureTime>
+            <departureTime>04:00</departureTime>
             <travelTime>1 час 20 минут</travelTime>
         </train>
         <train>
@@ -44,7 +44,7 @@
                 <destination>Воронеж</destination>
             </route>
             <departureTime>11:15</departureTime>
-            <travelTime>3 часа</travelTime>
+            <travelTime>6 часов</travelTime>
         </train>
         <train>
             <index>9</index>

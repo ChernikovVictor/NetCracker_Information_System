@@ -24,21 +24,20 @@ public class Server {
     public static void main(String[] args) {
         setLogFileName();   // определям файл для логов
         XmlTransportModel xmlTransportModel = new XmlTransportModel();
+        TransportController xmlController = new TransportController(xmlTransportModel);
         BinaryTransportModel binaryTransportModel = new BinaryTransportModel();
-        TransportController xmlController, binaryController;
+        TransportController binaryController = new TransportController(binaryTransportModel);
         try {
             server = new ServerSocket(PORT);
             log.info("Сервер запущен");
 
             /* Получаем данные из xml-файла */
-            xmlTransportModel.downloadTransports(FILENAME_XML);
-            xmlController = new TransportController(xmlTransportModel);
+            xmlController.downloadTransports(FILENAME_XML);
             log.info("Считали из файла список транспортов\n{}",
                     (new ConsoleView()).getAllTransportsInfo(xmlTransportModel));
 
             /* Получаем данные из bin-файла */
-            binaryTransportModel.downloadTransports(FILENAME_BIN);
-            binaryController = new TransportController(binaryTransportModel);
+            binaryController.downloadTransports(FILENAME_BIN);
             log.info("Считали из файла список транспортов\n{}",
                     (new ConsoleView()).getAllTransportsInfo(binaryTransportModel));
 
@@ -54,8 +53,8 @@ public class Server {
         } catch (DisableServerException e) {
             log.info("Получена команда завершения работы сервера\n");
         } finally {
-            binaryTransportModel.saveTransports(FILENAME_BIN);
-            xmlTransportModel.saveTransports(FILENAME_XML);
+            binaryController.saveTransports(FILENAME_BIN);
+            xmlController.saveTransports(FILENAME_XML);
             try {
                 server.close();
                 log.info("Сервер завершил работу");
@@ -65,7 +64,7 @@ public class Server {
         }
     }
 
-    /* Определить файл логирования для текущего потока и производных от него потоков */
+    /* Определить файл логирования для текущего потока */
     private static void setLogFileName() {
         MDC.clear();
         MDC.put("logFileName", FILENAME_LOG);

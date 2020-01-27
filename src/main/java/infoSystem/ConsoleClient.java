@@ -18,58 +18,64 @@ public class ConsoleClient {
 
         System.out.println("Клиент начал работу");
         View view = new ConsoleView();
+        Scanner scanner = new Scanner(System.in);
 
         try {
             clientSocket = new Socket("localhost", PORT);
             out = new ObjectOutputStream(clientSocket.getOutputStream());
             in = new ObjectInputStream(clientSocket.getInputStream());
-            Scanner scanner = new Scanner(System.in);
 
-            /* Возможность выключить сервер */
-            System.out.println("Отключить сервер: \"disable\"\n" +
-                    "Продолжить работу: \"something_else\"");
-            String command = scanner.nextLine();
-            out.writeObject(command);
-            out.flush();
-            if (command.equals("disable"))
-            {
+            if (isDisableServerCommand(scanner)) {
                 return;
             }
 
             System.out.println("Введите сообщение серверу");
             do {
-                command = scanner.nextLine();
+                String command = scanner.nextLine();
                 System.out.println("---------------------------------------");
                 out.writeObject(command);
                 out.flush();
 
-                if (!command.equals("exit")) {
-                    Object answer = in.readObject();
-                    if (answer instanceof String) {
-                        System.out.println(answer);
-                    } else if (answer instanceof Transport) {
-                        view.showTransport((Transport) answer);
-                    } else if (answer instanceof List<?>) {
-                        view.showAllTransports(new XmlTransportModel((List<Transport>) answer));
-                    }
+                if (command.equals("exit")) {
+                    break;
                 }
 
+                Object serverAnswer = in.readObject();
+                if (serverAnswer instanceof String) {
+                    System.out.println(serverAnswer);
+                } else if (serverAnswer instanceof Transport) {
+                    view.showTransport((Transport) serverAnswer);
+                } else if (serverAnswer instanceof List<?>) {
+                    view.showAllTransports(new XmlTransportModel((List<Transport>) serverAnswer));
+                }
                 System.out.println("---------------------------------------");
-            } while (!command.equals("exit"));
-
-            System.out.println("Клиент отсоединился от сервера");
-
+            } while (true);
         } catch (IOException | ClassNotFoundException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         } finally {
-            try {
-                in.close();
-                out.close();
-                clientSocket.close();
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-            }
-            System.out.println("Клиент закончил работу");
+            disconnect();
         }
+    }
+
+    /* Отключиться от сервера */
+    private static void disconnect() {
+        try {
+            in.close();
+            out.close();
+            clientSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Клиент закончил работу");
+    }
+
+    /* Возможность выключить сервер */
+    private static boolean isDisableServerCommand(Scanner scanner) throws IOException {
+        System.out.println("Отключить сервер: \"disable\"\n" +
+                "Продолжить работу: \"something_else\"");
+        String command = scanner.nextLine();
+        out.writeObject(command);
+        out.flush();
+        return command.equals("disable");
     }
 }
