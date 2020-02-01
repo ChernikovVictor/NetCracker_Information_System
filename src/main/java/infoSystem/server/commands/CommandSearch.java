@@ -1,10 +1,13 @@
 package infoSystem.server.commands;
 
 import infoSystem.TransportController;
-import infoSystem.model.Model;
+import infoSystem.model.BinaryTransportModel;
+import infoSystem.model.Transport;
 import infoSystem.server.ServerCommands;
 import infoSystem.view.ConsoleView;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 @Slf4j
 public class CommandSearch extends Command {
@@ -16,8 +19,9 @@ public class CommandSearch extends Command {
 
     @Override
     public Object execute(TransportController controller) {
-        Model patternModel = controller.getModelByPattern(getParameter());
-        log.info("Список, переданный клиенту:\n{}", (new ConsoleView()).getAllTransportsInfo(patternModel));
-        return patternModel.getTransports();
+        List<Transport> transports = controller.getTransportsByPattern(getParameter());
+        log.info("Список, переданный клиенту:\n{}", (new ConsoleView()).
+                getAllTransportsInfo(new BinaryTransportModel(transports)));
+        return transports;
     }
 }

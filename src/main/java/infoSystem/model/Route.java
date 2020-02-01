@@ -1,5 +1,6 @@
 package infoSystem.model;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.*;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -10,6 +11,7 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonAutoDetect
 @XmlRootElement(name = "route")
 @XmlType(propOrder = {"departure", "destination"})
 public class Route implements Serializable

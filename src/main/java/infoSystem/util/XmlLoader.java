@@ -18,11 +18,11 @@ public class XmlLoader {
     /* Получить список траспортов из XML файла */
     public static List<Transport> getFromXML(File file) {
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(TransportListWrapper.class);
+            JAXBContext jaxbContext = JAXBContext.newInstance(TransportListXmlDTO.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            TransportListWrapper wrapper = (TransportListWrapper) unmarshaller.unmarshal(file);
+            TransportListXmlDTO dto = (TransportListXmlDTO) unmarshaller.unmarshal(file);
             log.info("Данные успешно загружены из {}", file.getName());
-            return wrapper.getTransports();
+            return dto.getTransports();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return null;
@@ -32,11 +32,11 @@ public class XmlLoader {
     /* Записать список траспортов в XML файл */
     public static void saveAsXML(List<Transport> transports, String filename) {
         try {
-            TransportListWrapper wrapper = new TransportListWrapper(transports);
-            JAXBContext context = JAXBContext.newInstance(TransportListWrapper.class);
+            TransportListXmlDTO dto = new TransportListXmlDTO(transports);
+            JAXBContext context = JAXBContext.newInstance(TransportListXmlDTO.class);
             Marshaller marshaller = context.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE); // флаг для читабельного вывода XML в JAXB
-            marshaller.marshal(wrapper, new File(filename));
+            marshaller.marshal(dto, new File(filename));
             log.info("Данные успешно сохранены в {}", filename);
         } catch (JAXBException e) {
             log.error(e.getMessage(), e);

@@ -3,13 +3,11 @@ package infoSystem.view;
 import infoSystem.model.Model;
 import infoSystem.model.Transport;
 
-import java.util.List;
 
 public class ConsoleView implements View
 {
     @Override
-    public void showTransport(Transport transport)
-    {
+    public void showTransport(Transport transport) {
         if (transport == null) {
             System.out.println("Поезда с таким номером не существует");
         }
@@ -21,11 +19,8 @@ public class ConsoleView implements View
     }
 
     @Override
-    public void showAllTransports(Model model)
-    {
-        List<Transport> transports = model.getTransports();
-        for (Transport transport : transports)
-            showTransport(transport);
+    public void showAllTransports(Model model) {
+        model.getTransports().forEach(this::showTransport);
     }
 
     @Override
@@ -35,11 +30,8 @@ public class ConsoleView implements View
 
     @Override
     public String getAllTransportsInfo(Model model) {
-        List<Transport> transports = model.getTransports();
         StringBuilder result = new StringBuilder();
-        for (Transport transport : transports) {
-            result.append(getTransportInfo(transport)).append('\n');
-        }
+        model.getTransports().forEach(transport -> result.append(getTransportInfo(transport)).append('\n'));
         return result.toString();
     }
 }

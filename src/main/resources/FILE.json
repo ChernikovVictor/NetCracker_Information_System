@@ -1,0 +1,27 @@
+{
+  "transports" : [ {
+    "index" : 21,
+    "route" : {
+      "departure" : "Лондон",
+      "destination" : "Ливерпуль"
+    },
+    "departureTime" : "11:00",
+    "travelTime" : "3 часа"
+  }, {
+    "index" : 22,
+    "route" : {
+      "departure" : "Манчестер",
+      "destination" : "Лондон"
+    },
+    "departureTime" : "08:00",
+    "travelTime" : "1 час 45 минут"
+  }, {
+    "index" : 23,
+    "route" : {
+      "departure" : "Кардифф",
+      "destination" : "Ливерпуль"
+    },
+    "departureTime" : "07:15",
+    "travelTime" : "2 часа"
+  } ]
+}

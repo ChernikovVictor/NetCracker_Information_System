@@ -127,46 +127,31 @@ public class SwingView extends JFrame {
         modelTypeMenu.setFont(new Font("Arial", Font.PLAIN, 15));
         menuBar.add(modelTypeMenu);
 
-        JRadioButtonMenuItem binaryType = new JRadioButtonMenuItem("Двоичного файла");
-        binaryType.setFont(new Font("Arial", Font.PLAIN, 15));
+        /* Пункт меню для загрузки из двоичного файла */
+        JRadioButtonMenuItem binaryType = createModelTypeRadioButton("bin");
         modelTypeMenu.add(binaryType);
-        binaryType.addActionListener(listener -> {
-            log.info("Нажали на пункт меню \"Двоичный файл\"");
-            try {
-                commandQueue.clear();
-                out.writeObject("switch bin");
-                out.flush();
-                log.info((String) in.readObject());
-            } catch (IOException | ClassNotFoundException ex) {
-                log.error(ex.getMessage(), ex);
-            }
-        });
 
-        JRadioButtonMenuItem xmlType = new JRadioButtonMenuItem("Файла xml");
-        xmlType.setFont(new Font("Arial", Font.PLAIN, 15));
-        xmlType.setSelected(true);
+        /* Пункт меню для загрузки из xml файла */
+        JRadioButtonMenuItem xmlType = createModelTypeRadioButton("xml");
         modelTypeMenu.add(xmlType);
-        xmlType.addActionListener(listener -> {
-            log.info("Нажали на пункт меню \"xml файл\"");
-            try {
-                commandQueue.clear();
-                out.writeObject("switch xml");
-                out.flush();
-                log.info((String) in.readObject());
-            } catch (IOException | ClassNotFoundException ex) {
-                log.error(ex.getMessage(), ex);
-            }
-        });
 
+        /* Пункт меню для загрузки из json файла */
+        JRadioButtonMenuItem jsonType = createModelTypeRadioButton("json");
+        modelTypeMenu.add(jsonType);
+
+        /* Объединить радио-кнопки в группу */
         ButtonGroup buttonGroup = new ButtonGroup();
         buttonGroup.add(binaryType);
         buttonGroup.add(xmlType);
+        buttonGroup.add(jsonType);
+        xmlType.setSelected(true);
 
         /* Пункт меню для загрузки данных на сервер */
         JMenu addTransportsMenu = new JMenu("Добавить на сервер");
         addTransportsMenu.setFont(new Font("Arial", Font.PLAIN, 15));
         menuBar.add(addTransportsMenu);
 
+        /* Пункт меню "Из файла" */
         JMenuItem fromFile = new JMenuItem("Из файла...");
         fromFile.setFont(new Font("Arial", Font.PLAIN, 15));
         addTransportsMenu.add(fromFile);
@@ -188,6 +173,24 @@ public class SwingView extends JFrame {
         });
 
         return menuBar;
+    }
+
+    /* конструктор радиокнопки для выбора файла с данными */
+    private JRadioButtonMenuItem createModelTypeRadioButton(String modelType) {
+        JRadioButtonMenuItem radioButton = new JRadioButtonMenuItem(modelType + " файла");
+        radioButton.setFont(new Font("Arial", Font.PLAIN, 15));
+        radioButton.addActionListener(listener -> {
+            log.info("Нажали на пункт меню \"{} файла\"", modelType);
+            try {
+                commandQueue.clear();
+                out.writeObject("switch " + modelType);
+                out.flush();
+                log.info((String) in.readObject());
+            } catch (IOException | ClassNotFoundException ex) {
+                log.error(ex.getMessage(), ex);
+            }
+        });
+        return radioButton;
     }
 
     private JButton createButton(String text) {

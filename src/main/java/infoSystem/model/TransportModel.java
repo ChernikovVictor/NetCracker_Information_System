@@ -27,12 +27,7 @@ public abstract class TransportModel extends AbstractTableModel implements Model
 
     @Override
     public void removeTransport(int index) {
-        for (Transport transport : transports) {
-            if (transport.getIndex() == index) {
-                transports.remove(transport);
-                return;
-            }
-        }
+        transports.removeIf(transport -> transport.getIndex() == index);
     }
 
     @Override
@@ -53,11 +48,6 @@ public abstract class TransportModel extends AbstractTableModel implements Model
                 return;
             }
         }
-    }
-
-    @Override
-    public boolean contains(Transport transport) {
-        return transports.contains(transport);
     }
 
     /* Методы интерфейса TableModel */

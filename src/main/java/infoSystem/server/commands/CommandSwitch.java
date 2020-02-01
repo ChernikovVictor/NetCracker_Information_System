@@ -15,7 +15,7 @@ public class CommandSwitch extends Command {
 
     @Override
     public TransportController execute(TransportController binaryController,
-           TransportController xmlController) throws CommandExecutionException {
+           TransportController xmlController, TransportController jsonController) throws CommandExecutionException {
         switch (getParameter()) {
             case "bin":
                 log.info("Файл данных изменен");
@@ -23,6 +23,9 @@ public class CommandSwitch extends Command {
             case "xml":
                 log.info("Файл данных изменен");
                 return xmlController;
+            case "json":
+                log.info("Файл данных изменен");
+                return jsonController;
             default:
                 log.error("Некорректные данные");
                 throw new CommandExecutionException("Некорректные данные");

@@ -39,32 +39,27 @@ public class TransportController
     }
 
     /* Получить модель с транспортами, соответствующими шаблону */
-    public synchronized Model getModelByPattern(String regex) {
-        List<Transport> transports = new ArrayList<>();
+    public synchronized List<Transport> getTransportsByPattern(String regex) {
         regex = regex.replaceAll("\\*", ".*");
         regex = regex.replaceAll("\\?", ".?");
         Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 
-        for (Transport transport : model.getTransports()) {
+        List<Transport> transports = new ArrayList<>();
+        model.getTransports().forEach(transport -> {
             Matcher matcher = pattern.matcher(transport.toString());
             if (matcher.find()) {
                 transports.add(transport);
             }
-        }
+        });
 
-        return (model instanceof XmlTransportModel) ? new XmlTransportModel(transports) : new BinaryTransportModel();
+        return transports;
     }
 
     /* Добавить в модель данные, исключая дубликаты */
     public synchronized void merge(List<Transport> transports) {
-        if (transports == null) {
-            return;
-        }
-        for (Transport transport : transports) {
-            if (!model.contains(transport)) {
-                model.addTransport(transport);
-            }
-        }
+        if (transports == null) { return; }
+        transports.removeIf(obj -> model.getTransports().contains(obj));
+        model.getTransports().addAll(transports);
     }
 
     public synchronized void downloadTransports(String filename) {

@@ -21,13 +21,15 @@ public class ServerThread extends Thread {
 
     private final TransportController binaryController;
     private final TransportController xmlController;
+    private final TransportController jsonController;
 
-    public ServerThread(Socket socket, TransportController binaryController, TransportController xmlController)
-            throws IOException, ClassNotFoundException, DisableServerException {
+    public ServerThread(Socket socket, TransportController binaryController, TransportController xmlController,
+            TransportController jsonController) throws IOException, ClassNotFoundException, DisableServerException {
 
         this.socket = socket;
         this.binaryController = binaryController;
         this.xmlController = xmlController;
+        this.jsonController = jsonController;
         controller = xmlController;     // по умолчанию
         out = new ObjectOutputStream(socket.getOutputStream());
         in = new ObjectInputStream(socket.getInputStream());
@@ -80,7 +82,7 @@ public class ServerThread extends Thread {
                     out.writeObject(clientCommand.execute(in, out, controller));
                     break;
                 case SWITCH:
-                    controller = clientCommand.execute(binaryController, xmlController);
+                    controller = clientCommand.execute(binaryController, xmlController, jsonController);
                     out.writeObject("Файл данных изменен");
                     break;
                 case HELP:

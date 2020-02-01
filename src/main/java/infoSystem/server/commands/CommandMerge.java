@@ -5,6 +5,7 @@ import infoSystem.model.Transport;
 import infoSystem.server.CommandExecutionException;
 import infoSystem.server.ServerCommands;
 import infoSystem.util.BinaryLoader;
+import infoSystem.util.JsonLoader;
 import infoSystem.util.XmlLoader;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,6 +39,9 @@ public class CommandMerge extends Command {
                 break;
             case ".xml":
                 transportList = XmlLoader.getFromXML(file);
+                break;
+            case ".json":
+                transportList = JsonLoader.getFromJson(file);
                 break;
         }
         controller.merge(transportList);

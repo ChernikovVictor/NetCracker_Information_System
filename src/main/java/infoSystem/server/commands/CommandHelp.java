@@ -20,7 +20,7 @@ public class CommandHelp extends Command {
                 "Показать все поезда: show\n" +
                 "Сортировать по времени отправления: sort\n" +
                 "Поиск по шаблону: search \"regex\"\n" +
-                "Выбрать файл для загрузки данных: switch \"bin\" switch \"xml\"\n" +
+                "Выбрать файл для загрузки данных: switch \"bin\" switch \"xml\" switch \"json\"\n" +
                 "Выход: exit\n" +
                 "\tКоманды изменения информации о поезде:\n" +
                 "Изменить номер поезда: index \"index\"\n" +

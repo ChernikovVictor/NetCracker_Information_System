@@ -31,8 +31,8 @@ public abstract class Command {
         throw new UnsupportedOperationException();
     }
 
-    public TransportController execute(TransportController binaryController, TransportController xmlController)
-            throws CommandExecutionException {
+    public TransportController execute(TransportController binaryController, TransportController xmlController,
+                              TransportController jsonController) throws CommandExecutionException {
         throw new UnsupportedOperationException();
     }
 }

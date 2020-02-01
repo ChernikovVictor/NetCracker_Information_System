@@ -13,5 +13,4 @@ public interface Model extends Serializable, TableModel
     List<Transport> getTransports();
     void downloadTransports(String filename);
     void saveTransports(String filename);
-    boolean contains(Transport transport);
 }

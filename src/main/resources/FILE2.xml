@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<transportListWrapper>
+<transportListXmlDTO>
     <transports>
         <train>
             <index>111</index>
@@ -20,21 +20,12 @@
             <travelTime>2 часа 15 минут</travelTime>
         </train>
         <train>
-            <index>5</index>
+            <index>21</index>
             <route>
-                <departure>Самара</departure>
-                <destination>Казань</destination>
+                <departure>Лондон</departure>
+                <destination>Ливерпуль</destination>
             </route>
-            <departureTime>03:00</departureTime>
-            <travelTime>1 час</travelTime>
-        </train>
-        <train>
-            <index>4</index>
-            <route>
-                <departure>Москва</departure>
-                <destination>Воронеж</destination>
-            </route>
-            <departureTime>11:15</departureTime>
+            <departureTime>11:00</departureTime>
             <travelTime>3 часа</travelTime>
         </train>
         <train>
@@ -43,8 +34,8 @@
                 <departure>Томск</departure>
                 <destination>Екатеринбург</destination>
             </route>
-            <departureTime>23:15</departureTime>
+            <departureTime>10:15</departureTime>
             <travelTime>4 часа</travelTime>
         </train>
     </transports>
-</transportListWrapper>
+</transportListXmlDTO>

@@ -7,14 +7,14 @@ import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/* Класс-обертка для сохранения списка транспортов в XML файл */
+/* Класс-DTO для сохранения списка транспортов в XML файл */
 @AllArgsConstructor
 @XmlRootElement
 @XmlSeeAlso({Train.class, Route.class})
-public class TransportListWrapper {
+public class TransportListXmlDTO {
     private List<Transport> transports;
 
-    public TransportListWrapper() {
+    public TransportListXmlDTO() {
         transports = new ArrayList<>();
     }
 
