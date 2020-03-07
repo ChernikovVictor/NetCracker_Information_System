@@ -35,7 +35,7 @@ public class SwingView extends JFrame {
     public SwingView() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("Справочная система");
-        this.addWindowListener(windowListener());
+        this.addWindowListener(windowAdapter());
         this.setLayout(new BorderLayout(10, 10));
 
         /* подключаемся к серверу */
@@ -376,11 +376,8 @@ public class SwingView extends JFrame {
     }
 
     /* Отключаемся от сервера при закрытии окна */
-    private WindowListener windowListener() {
-        return new WindowListener() {
-            @Override
-            public void windowOpened(WindowEvent e) { }
-
+    private WindowListener windowAdapter() {
+        return new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
                 try {
@@ -395,21 +392,6 @@ public class SwingView extends JFrame {
                     log.info("Клиент закончил работу");
                 }
             }
-
-            @Override
-            public void windowClosed(WindowEvent e) { }
-
-            @Override
-            public void windowIconified(WindowEvent e) { }
-
-            @Override
-            public void windowDeiconified(WindowEvent e) { }
-
-            @Override
-            public void windowActivated(WindowEvent e) { }
-
-            @Override
-            public void windowDeactivated(WindowEvent e) { }
         };
     }
 }

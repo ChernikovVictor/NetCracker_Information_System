@@ -7,6 +7,7 @@ import java.util.LinkedList;
 
 import infoSystem.TransportController;
 import infoSystem.model.*;
+import infoSystem.util.ControllersDTO;
 import infoSystem.view.ConsoleView;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -17,9 +18,7 @@ public class Server {
     private static LinkedList<ServerThread> serverThreads = new LinkedList<>(); // список всех нитей
     private static ServerSocket server;
 
-    private static TransportController binaryController;
-    private static TransportController xmlController;
-    private static TransportController jsonController;
+    private static ControllersDTO controllersDTO;   // доступные контроллеры
 
     private static final int PORT = 4004;
     private static final String FILENAME_XML = "src\\main\\resources\\FILE.xml";
@@ -29,7 +28,7 @@ public class Server {
 
     public static void main(String[] args) {
         setLogFileName();   // определяем файл для логов
-        initControllers();  // читаем данные из файлов
+        controllersDTO = initControllers();
         try {
             server = new ServerSocket(PORT);
             log.info("Сервер запущен");
@@ -38,7 +37,7 @@ public class Server {
             while (true) {
                 Socket clientSocket = server.accept();
                 log.info("К серверу подключился клиент");
-                serverThreads.add(new ServerThread(clientSocket, binaryController, xmlController, jsonController));
+                serverThreads.add(new ServerThread(clientSocket, controllersDTO));
             }
         } catch (IOException | ClassNotFoundException e) {
             log.error(e.getMessage(), e);
@@ -56,18 +55,20 @@ public class Server {
     }
 
     /* Инициализация контроллеров */
-    private static void initControllers() {
+    private static ControllersDTO initControllers() {
         XmlTransportModel xmlTransportModel = new XmlTransportModel();
-        xmlController = new TransportController(xmlTransportModel);
+        TransportController xmlController = new TransportController(xmlTransportModel);
         readModel(xmlController, FILENAME_XML);
 
         BinaryTransportModel binaryTransportModel = new BinaryTransportModel();
-        binaryController = new TransportController(binaryTransportModel);
+        TransportController binaryController = new TransportController(binaryTransportModel);
         readModel(binaryController, FILENAME_BIN);
 
         JsonTransportModel jsonTransportModel = new JsonTransportModel();
-        jsonController = new TransportController(jsonTransportModel);
+        TransportController jsonController = new TransportController(jsonTransportModel);
         readModel(jsonController, FILENAME_JSON);
+
+        return new ControllersDTO(binaryController, xmlController, jsonController);
     }
 
     /* Считать данные из файла */
@@ -79,9 +80,9 @@ public class Server {
 
     /* Сохранить данные, выключить сервер */
     private static void disableServer() {
-        binaryController.saveTransports(FILENAME_BIN);
-        xmlController.saveTransports(FILENAME_XML);
-        jsonController.saveTransports(FILENAME_JSON);
+        controllersDTO.getBinaryController().saveTransports(FILENAME_BIN);
+        controllersDTO.getXmlController().saveTransports(FILENAME_XML);
+        controllersDTO.getJsonController().saveTransports(FILENAME_JSON);
         try {
             server.close();
             log.info("Сервер завершил работу");

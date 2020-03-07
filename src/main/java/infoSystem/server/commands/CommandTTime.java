@@ -2,6 +2,7 @@ package infoSystem.server.commands;
 
 import infoSystem.model.Transport;
 import infoSystem.server.ServerCommands;
+import infoSystem.util.DataForCommandDTO;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -13,7 +14,8 @@ public class CommandTTime extends Command {
     }
 
     @Override
-    public Object execute(Transport transport) {
+    public Object execute(DataForCommandDTO data) {
+        Transport transport = data.getTransport();
         transport.setTravelTime(getParameter());
         log.info("Время в пути изменено");
         return "Время в пути изменено";

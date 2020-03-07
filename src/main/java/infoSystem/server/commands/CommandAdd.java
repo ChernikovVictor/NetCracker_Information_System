@@ -4,6 +4,7 @@ import infoSystem.TransportController;
 import infoSystem.model.*;
 import infoSystem.server.CommandExecutionException;
 import infoSystem.server.ServerCommands;
+import infoSystem.util.DataForCommandDTO;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -17,8 +18,12 @@ public class CommandAdd extends Command {
     }
 
     @Override
-    public Object execute(ObjectInputStream in, ObjectOutputStream out, TransportController controller)
-        throws CommandExecutionException {
+    public Object execute(DataForCommandDTO data) throws CommandExecutionException {
+
+        ObjectInputStream in = data.getInputStream();
+        ObjectOutputStream out = data.getOutputStream();
+        TransportController controller = data.getController();
+
         try {
             Transport transport = createTransport(in, out);
             controller.addTransport(transport);

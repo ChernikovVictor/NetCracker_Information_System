@@ -1,12 +1,9 @@
 package infoSystem.server.commands;
 
-import infoSystem.TransportController;
 import infoSystem.model.Transport;
 import infoSystem.server.CommandExecutionException;
 import infoSystem.server.ServerCommands;
-import infoSystem.util.BinaryLoader;
-import infoSystem.util.JsonLoader;
-import infoSystem.util.XmlLoader;
+import infoSystem.util.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -21,11 +18,10 @@ public class CommandMerge extends Command {
     }
 
     @Override
-    public Object execute(ObjectInputStream in, ObjectOutputStream out,
-                          TransportController controller) throws CommandExecutionException {
+    public Object execute(DataForCommandDTO data) throws CommandExecutionException {
         File file;
         try {
-            file = (File) in.readObject();
+            file = (File) data.getInputStream().readObject();
         } catch (IOException | ClassNotFoundException e) {
             log.error(e.getMessage(), e);
             throw new CommandExecutionException("Некорректные данные о файле");
@@ -44,7 +40,7 @@ public class CommandMerge extends Command {
                 transportList = JsonLoader.getFromJson(file);
                 break;
         }
-        controller.merge(transportList);
+        data.getController().merge(transportList);
 
         String result = (transportList == null) ? "Ошибка. Проверьте содержимое файла" : "Данные успешно добавлены на сервер";
         log.info(result);

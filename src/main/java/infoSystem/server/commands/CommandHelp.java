@@ -1,6 +1,7 @@
 package infoSystem.server.commands;
 
 import infoSystem.server.ServerCommands;
+import infoSystem.util.DataForCommandDTO;
 
 public class CommandHelp extends Command {
 
@@ -11,7 +12,7 @@ public class CommandHelp extends Command {
 
     /* справка по командам */
     @Override
-    public Object execute() {
+    public Object execute(DataForCommandDTO data) {
         return "Показать информацию о поезде: get \"index\"\n" +
                 "Изменить информацию о поезде: set \"index\"\n" +
                 "Добавить поезд: add\n" +

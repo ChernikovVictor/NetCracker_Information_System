@@ -3,6 +3,7 @@ package infoSystem.server.commands;
 import infoSystem.TransportController;
 import infoSystem.server.CommandExecutionException;
 import infoSystem.server.ServerCommands;
+import infoSystem.util.DataForCommandDTO;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -14,7 +15,7 @@ public class CommandRm extends Command {
     }
 
     @Override
-    public Object execute(TransportController controller) throws CommandExecutionException {
+    public Object execute(DataForCommandDTO data) throws CommandExecutionException {
         int index;
         try {
             index = Integer.parseInt(getParameter());
@@ -23,6 +24,7 @@ public class CommandRm extends Command {
             throw new CommandExecutionException("Некорректный индекс");
         }
 
+        TransportController controller = data.getController();
         if (controller.getTransport(index) == null) {
             log.info("Поезда с таким номером не существует");
             return "Поезда с таким номером не существует";

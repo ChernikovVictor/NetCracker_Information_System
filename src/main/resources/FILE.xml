@@ -28,5 +28,14 @@
             <departureTime>10:15</departureTime>
             <travelTime>4 часа</travelTime>
         </train>
+        <train>
+            <index>8</index>
+            <route>
+                <departure>Казань</departure>
+                <destination>Киров</destination>
+            </route>
+            <departureTime>16:20</departureTime>
+            <travelTime>2 часа 10 минут</travelTime>
+        </train>
     </transports>
 </transportListXmlDTO>

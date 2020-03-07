@@ -4,6 +4,7 @@ import infoSystem.TransportController;
 import infoSystem.model.BinaryTransportModel;
 import infoSystem.model.Transport;
 import infoSystem.server.ServerCommands;
+import infoSystem.util.DataForCommandDTO;
 import infoSystem.view.ConsoleView;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,7 +19,8 @@ public class CommandSearch extends Command {
     }
 
     @Override
-    public Object execute(TransportController controller) {
+    public Object execute(DataForCommandDTO data) {
+        TransportController controller = data.getController();
         List<Transport> transports = controller.getTransportsByPattern(getParameter());
         log.info("Список, переданный клиенту:\n{}", (new ConsoleView()).
                 getAllTransportsInfo(new BinaryTransportModel(transports)));

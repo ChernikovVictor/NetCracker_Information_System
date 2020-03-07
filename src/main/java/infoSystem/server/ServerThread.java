@@ -2,6 +2,8 @@ package infoSystem.server;
 
 import infoSystem.server.commands.Command;
 import infoSystem.TransportController;
+import infoSystem.util.ControllersDTO;
+import infoSystem.util.DataForCommandDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 
@@ -15,22 +17,18 @@ public class ServerThread extends Thread {
     private Socket socket;
     private ObjectInputStream in;
     private ObjectOutputStream out;
-    private TransportController controller;
+    private TransportController controller;     // текущий выбранный контроллер
 
     private static final String FILENAME_LOG = Server.class.getSimpleName();
 
-    private final TransportController binaryController;
-    private final TransportController xmlController;
-    private final TransportController jsonController;
+    private final ControllersDTO controllersDTO;
 
-    public ServerThread(Socket socket, TransportController binaryController, TransportController xmlController,
-            TransportController jsonController) throws IOException, ClassNotFoundException, DisableServerException {
+    public ServerThread(Socket socket, ControllersDTO controllersDTO) throws IOException,
+            ClassNotFoundException, DisableServerException {
 
         this.socket = socket;
-        this.binaryController = binaryController;
-        this.xmlController = xmlController;
-        this.jsonController = jsonController;
-        controller = xmlController;     // по умолчанию
+        this.controllersDTO = controllersDTO;
+        controller = controllersDTO.getXmlController();     // по умолчанию
         out = new ObjectOutputStream(socket.getOutputStream());
         in = new ObjectInputStream(socket.getInputStream());
 
@@ -73,20 +71,16 @@ public class ServerThread extends Thread {
 
     /* Выполнить команду, отправить результат клиенту */
     private void executeCommand(Command clientCommand) throws IOException {
+        DataForCommandDTO data = DataForCommandDTO.builder().controller(controller).inputStream(in).
+                outputStream(out).controllersDTO(controllersDTO).build();
         try {
             switch (clientCommand.getCommandID()) {
-                case ADDNULL: case GET: case RM: case SEARCH: case SHOW: case SORT:
-                    out.writeObject(clientCommand.execute(controller));
-                    break;
-                case ADD: case MERGE: case SET:
-                    out.writeObject(clientCommand.execute(in, out, controller));
+                case ADDNULL: case GET: case RM: case SEARCH: case SHOW: case SORT: case ADD: case MERGE: case SET: case HELP:
+                    out.writeObject(clientCommand.execute(data));
                     break;
                 case SWITCH:
-                    controller = clientCommand.execute(binaryController, xmlController, jsonController);
+                    controller = (TransportController) clientCommand.execute(data);
                     out.writeObject("Файл данных изменен");
-                    break;
-                case HELP:
-                    out.writeObject(clientCommand.execute());
                     break;
                 case EXIT:
                     break;

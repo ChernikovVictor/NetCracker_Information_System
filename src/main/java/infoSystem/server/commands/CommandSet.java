@@ -1,8 +1,8 @@
 package infoSystem.server.commands;
 
-import infoSystem.TransportController;
 import infoSystem.model.Transport;
 import infoSystem.server.*;
+import infoSystem.util.DataForCommandDTO;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -16,8 +16,7 @@ public class CommandSet extends Command {
     }
 
     @Override
-    public Object execute(ObjectInputStream in, ObjectOutputStream out, TransportController controller)
-            throws CommandExecutionException {
+    public Object execute(DataForCommandDTO data) throws CommandExecutionException {
         int index;
         try {
             index = Integer.parseInt(getParameter());
@@ -26,14 +25,14 @@ public class CommandSet extends Command {
             throw new CommandExecutionException("Некорректный индекс");
         }
 
-        Transport transport = controller.getTransport(index);
+        Transport transport = data.getController().getTransport(index);
         if (transport == null) {
             log.info("Поезда с таким номером не существует");
             return "Поезда с таким номером не существует";
         }
 
         try {
-            changeTransportInfo(in, out, transport);
+            changeTransportInfo(data.getInputStream(), data.getOutputStream(), transport);
         } catch (IOException | ClassNotFoundException e) {
             log.error("Некорректные данные", e);
             throw new CommandExecutionException("Некорректные данные");
@@ -52,15 +51,13 @@ public class CommandSet extends Command {
         out.reset();    // удалить хеши объектов, переданных в поток ранее
 
         Command clientCommand;
+        DataForCommandDTO data = DataForCommandDTO.builder().transport(transport).build();
         do {
             clientCommand = CommandFactory.createCommand((String) in.readObject());
             try {
                 switch (clientCommand.getCommandID()) {
-                    case DTIME: case INDEX: case ROUTE: case TTIME:
-                        out.writeObject(clientCommand.execute(transport));
-                        break;
-                    case HELP:
-                        out.writeObject(clientCommand.execute());
+                    case DTIME: case INDEX: case ROUTE: case TTIME: case HELP:
+                        out.writeObject(clientCommand.execute(data));
                         break;
                     case RETURN:
                         break;
