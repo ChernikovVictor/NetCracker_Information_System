@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<transportListXmlDTO>
+    <transports>
+        <train>
+            <index>4</index>
+            <route>
+                <departure>Донецк</departure>
+                <destination>Чехов</destination>
+            </route>
+            <departureTime>12:15</departureTime>
+            <travelTime>4 часа</travelTime>
+        </train>
+        <train>
+            <index>5</index>
+            <route>
+                <departure>Новокузнецк</departure>
+                <destination>Владивосток</destination>
+            </route>
+            <departureTime>09:00</departureTime>
+            <travelTime>72 часа</travelTime>
+        </train>
+        <train>
+            <index>9</index>
+            <route>
+                <departure>Томск</departure>
+                <destination>Екатеринбург</destination>
+            </route>
+            <departureTime>10:15</departureTime>
+            <travelTime>4 часа</travelTime>
+        </train>
+        <train>
+            <index>8</index>
+            <route>
+                <departure>Казань</departure>
+                <destination>Киров</destination>
+            </route>
+            <departureTime>16:20</departureTime>
+            <travelTime>2 часа 10 минут</travelTime>
+        </train>
+    </transports>
+</transportListXmlDTO>
